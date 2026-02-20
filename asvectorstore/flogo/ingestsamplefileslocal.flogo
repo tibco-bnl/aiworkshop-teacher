@@ -1,0 +1,910 @@
+{
+  "imports": [
+    "github.com/project-flogo/flow",
+    "github.com/project-flogo/contrib/activity/noop",
+    "gitlab.com/jurriaanbrandsmaflogoextensions/ingestion/activity/chunking",
+    "github.com/tibco/flogo-general/src/app/General/activity/parsejson",
+    "github.com/tibco/flogo-general/src/app/General/activity/log",
+    "github.com/tibco/flogo-files/src/app/File/activity/read",
+    "github.com/mbloomfi-tibco/extensions/asVectorDB/activity/documentDetails",
+    "github.com/project-flogo/flow/activity/subflow",
+    "github.com/project-flogo/contrib/activity/actreturn",
+    "github.com/tibco/flogo-files/src/app/File/activity/list",
+    "gitlab.com/jurriaanbrandsmaflogoextensions/ingestion/activity/embedding",
+    "github.com/mbloomfi-tibco/extensions/asVectorDB/activity/newVector",
+    "github.com/tibco/flogo-general/src/app/General/trigger/startuphook",
+    "git.tibco.com/git/product/ipaas/wi-contrib.git/function/boolean",
+    "github.com/project-flogo/contrib/function/string",
+    "github.com/project-flogo/contrib/function/array",
+    "github.com/project-flogo/contrib/function/coerce"
+  ],
+  "name": "ingestfile",
+  "description": "",
+  "version": "1.0.0",
+  "type": "flogo:app",
+  "appModel": "1.1.1",
+  "tags": [],
+  "triggers": [
+    {
+      "ref": "#startuphook",
+      "name": "tibco-appstartup",
+      "description": "This trigger allows you to execute flows before other triggers in the application are started. This is useful in initializing application specific tasks.",
+      "settings": {},
+      "id": "AppStartupTrigger",
+      "handlers": [
+        {
+          "description": "",
+          "action": {
+            "ref": "github.com/project-flogo/flow",
+            "settings": {
+              "flowURI": "res://flow:Main"
+            }
+          },
+          "name": "Main"
+        }
+      ]
+    }
+  ],
+  "resources": [
+    {
+      "id": "flow:Chunkfile",
+      "data": {
+        "name": "Chunkfile",
+        "description": "",
+        "links": [
+          {
+            "id": 1,
+            "from": "StartActivity",
+            "to": "Chunkatext",
+            "type": "label",
+            "label": "StartActivity to Chunkatext"
+          },
+          {
+            "id": 2,
+            "from": "Chunkatext",
+            "to": "ParseJSON",
+            "type": "label",
+            "label": "Chunkatext1 to ParseJSON"
+          },
+          {
+            "id": 3,
+            "from": "ParseJSON",
+            "to": "LogMessage1",
+            "type": "label",
+            "label": "ParseJSON to LogMessage1"
+          },
+          {
+            "id": 4,
+            "from": "LogMessage1",
+            "to": "ReadFile",
+            "type": "label",
+            "label": "LogMessage1 to ReadFile"
+          },
+          {
+            "id": 5,
+            "from": "ReadFile",
+            "to": "LogMessage",
+            "type": "label",
+            "label": "ReadFile to LogMessage"
+          },
+          {
+            "id": 6,
+            "from": "LogMessage",
+            "to": "DocumentDetails",
+            "type": "label",
+            "label": "LogMessage to DocumentDetails"
+          },
+          {
+            "id": 7,
+            "from": "DocumentDetails",
+            "to": "StartaSubFlow",
+            "type": "label",
+            "label": "DocumentDetails to StartaSubFlow"
+          },
+          {
+            "id": 8,
+            "from": "StartaSubFlow",
+            "to": "Return",
+            "type": "label",
+            "label": "StartaSubFlow to Return"
+          }
+        ],
+        "tasks": [
+          {
+            "id": "StartActivity",
+            "name": "StartActivity",
+            "description": "NoOp Activity",
+            "activity": {
+              "ref": "#noop"
+            }
+          },
+          {
+            "id": "Chunkatext",
+            "name": "Chunkatext",
+            "description": "Chunks a text into smaller parts based on specified chunk size and overlap.",
+            "activity": {
+              "ref": "#chunking",
+              "settings": {
+                "DoclingURL": "=$property[\"Doclinghost\"]",
+                "DoclingPort": "=$property[\"Doclingport\"]",
+                "Directory": "=$property[\"FilesDirectory\"]"
+              },
+              "input": {
+                "FileName": "=$flow.filename",
+                "KeepFile": "=boolean.true()",
+                "inputText": ""
+              }
+            }
+          },
+          {
+            "id": "ParseJSON",
+            "name": "ParseJSON",
+            "description": "Parses JSON string into JSON object",
+            "activity": {
+              "ref": "#parsejson",
+              "input": {
+                "validate": false,
+                "jsonString": "=$activity[Chunkatext].chunkJSON"
+              },
+              "schemas": {
+                "output": {
+                  "jsonObject": {
+                    "type": "json",
+                    "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"chunks\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"},\"chunk_index\":{\"type\":\"number\"},\"text\":{\"type\":\"string\"},\"raw_text\":{\"type\":\"string\"},\"num_tokens\":{\"type\":\"number\"},\"headings\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"captions\":{\"type\":\"string\"},\"doc_items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"page_numbers\":{\"type\":\"array\",\"items\":{}},\"metadata\":{\"type\":\"object\",\"properties\":{\"origin\":{\"type\":\"object\",\"properties\":{\"mimetype\":{\"type\":\"string\"},\"binary_hash\":{\"type\":\"number\"},\"filename\":{\"type\":\"string\"},\"uri\":{\"type\":\"string\"}}}}}},\"required\":[\"filename\",\"chunk_index\",\"text\",\"raw_text\",\"num_tokens\",\"headings\",\"captions\",\"doc_items\",\"page_numbers\",\"metadata\"]}},\"documents\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"kind\":{\"type\":\"string\"},\"content\":{\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"},\"md_content\":{\"type\":\"string\"},\"json_content\":{\"type\":\"string\"},\"html_content\":{\"type\":\"string\"},\"text_content\":{\"type\":\"string\"},\"doctags_content\":{\"type\":\"string\"}}},\"status\":{\"type\":\"string\"},\"errors\":{\"type\":\"array\",\"items\":{}},\"timings\":{\"type\":\"object\",\"properties\":{}}}}},\"processing_time\":{\"type\":\"number\"}}}",
+                    "fe_metadata": "{\r\n\t\"chunks\": [\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 0,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nCompany Overview\\n**Britannic Circuits Ltd.**\\nis a leading UK-based designer and manufacturer of high-performance radio frequency (RF) systems and compound semiconductors. Headquartered in London with R&D facilities in Cambridge, the company provides critical components for the telecommunications, defense, and aerospace markets.\\n**Corporate Details:**\\n- **Headquarters:** 7 London Wall, London, UK\\n- **Contact:**\\n- **Founded:** 2015\\n- **Industry:** Semiconductors & RF Systems\\n- **Employee Count:** 1,600 (as of 2025)\\n- **Legal Structure:** Private Limited Company (Ltd.)\\n- **Stock Exchange:** London Stock Exchange (LSE: BCL)\",\r\n\t\t\t\"raw_text\": \"**Britannic Circuits Ltd.**\\nis a leading UK-based designer and manufacturer of high-performance radio frequency (RF) systems and compound semiconductors. Headquartered in London with R&D facilities in Cambridge, the company provides critical components for the telecommunications, defense, and aerospace markets.\\n**Corporate Details:**\\n- **Headquarters:** 7 London Wall, London, UK\\n- **Contact:**\\n- **Founded:** 2015\\n- **Industry:** Semiconductors & RF Systems\\n- **Employee Count:** 1,600 (as of 2025)\\n- **Legal Structure:** Private Limited Company (Ltd.)\\n- **Stock Exchange:** London Stock Exchange (LSE: BCL)\",\r\n\t\t\t\"num_tokens\": 169,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Company Overview\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/2\",\r\n\t\t\t\t\"#/texts/3\",\r\n\t\t\t\t\"#/texts/4\",\r\n\t\t\t\t\"#/texts/5\",\r\n\t\t\t\t\"#/texts/8\",\r\n\t\t\t\t\"#/texts/10\",\r\n\t\t\t\t\"#/texts/13\",\r\n\t\t\t\t\"#/texts/16\",\r\n\t\t\t\t\"#/texts/19\",\r\n\t\t\t\t\"#/texts/22\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 1,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nStrategy & Vision\\nMission Statement\\nTo connect and protect the world by engineering the most advanced radio frequency and compound semiconductor solutions for mission-critical applications.\",\r\n\t\t\t\"raw_text\": \"To connect and protect the world by engineering the most advanced radio frequency and compound semiconductor solutions for mission-critical applications.\",\r\n\t\t\t\"num_tokens\": 37,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Strategy & Vision\",\r\n\t\t\t\t\"Mission Statement\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/27\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 2,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nStrategy & Vision\\nStrategic Vision 2025-2030\\nOur \\\"Spectrum Dominance\\\" strategy focuses on:\\n**1. 5G & 6G Leadership**\\n- Designing high-efficiency GaN (Gallium Nitride) power amplifiers for 5G base stations.\\n- Researching terahertz (THz) frequency technologies for future 6G networks.\\n- Developing advanced RF filters and front-end modules.\\n**2. Aerospace & Defense**\\n- Building next-generation radar systems (AESA) for defense applications.\\n- Providing radiation-hardened components for satellites and space exploration.\\n- Secure communication systems for military and government clients.\\n**3. Advanced Materials R&D**\\n- Expanding our UK-based compound semiconductor (GaN, GaAs) fabrication.\\n- Researching new materials like SiC (Silicon Carbide) for power electronics.\\n- Leading UK efforts in quantum sensing technologies.\",\r\n\t\t\t\"raw_text\": \"Our \\\"Spectrum Dominance\\\" strategy focuses on:\\n**1. 5G & 6G Leadership**\\n- Designing high-efficiency GaN (Gallium Nitride) power amplifiers for 5G base stations.\\n- Researching terahertz (THz) frequency technologies for future 6G networks.\\n- Developing advanced RF filters and front-end modules.\\n**2. Aerospace & Defense**\\n- Building next-generation radar systems (AESA) for defense applications.\\n- Providing radiation-hardened components for satellites and space exploration.\\n- Secure communication systems for military and government clients.\\n**3. Advanced Materials R&D**\\n- Expanding our UK-based compound semiconductor (GaN, GaAs) fabrication.\\n- Researching new materials like SiC (Silicon Carbide) for power electronics.\\n- Leading UK efforts in quantum sensing technologies.\",\r\n\t\t\t\"num_tokens\": 188,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Strategy & Vision\",\r\n\t\t\t\t\"Strategic Vision 2025-2030\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/29\",\r\n\t\t\t\t\"#/texts/30\",\r\n\t\t\t\t\"#/texts/31\",\r\n\t\t\t\t\"#/texts/32\",\r\n\t\t\t\t\"#/texts/33\",\r\n\t\t\t\t\"#/texts/34\",\r\n\t\t\t\t\"#/texts/35\",\r\n\t\t\t\t\"#/texts/36\",\r\n\t\t\t\t\"#/texts/37\",\r\n\t\t\t\t\"#/texts/38\",\r\n\t\t\t\t\"#/texts/39\",\r\n\t\t\t\t\"#/texts/40\",\r\n\t\t\t\t\"#/texts/41\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 3,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nStrategy & Vision\\nKey Innovation Areas\\n- **Gallium Nitride (GaN) RF Amplifiers**\\n- **AESA Radar Systems**\\n- **Satellite (SatCom) RF Modules**\\n- **Compound Semiconductor Fabrication**\",\r\n\t\t\t\"raw_text\": \"- **Gallium Nitride (GaN) RF Amplifiers**\\n- **AESA Radar Systems**\\n- **Satellite (SatCom) RF Modules**\\n- **Compound Semiconductor Fabrication**\",\r\n\t\t\t\"num_tokens\": 59,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Strategy & Vision\",\r\n\t\t\t\t\"Key Innovation Areas\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/43\",\r\n\t\t\t\t\"#/texts/44\",\r\n\t\t\t\t\"#/texts/45\",\r\n\t\t\t\t\"#/texts/46\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 4,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nOrganizational Structure\\nExecutive Leadership Team\\n- **Chief Executive Officer:** Sir Alistair Reed\\n- **Chief Technology Officer:** Dr. Fiona Patel\\n- **Chief Financial Officer:** James Harrison\\n- **EVP, Defence & Aero:** Mark Thompson\",\r\n\t\t\t\"raw_text\": \"- **Chief Executive Officer:** Sir Alistair Reed\\n- **Chief Technology Officer:** Dr. Fiona Patel\\n- **Chief Financial Officer:** James Harrison\\n- **EVP, Defence & Aero:** Mark Thompson\",\r\n\t\t\t\"num_tokens\": 64,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Organizational Structure\",\r\n\t\t\t\t\"Executive Leadership Team\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/49\",\r\n\t\t\t\t\"#/texts/52\",\r\n\t\t\t\t\"#/texts/55\",\r\n\t\t\t\t\"#/texts/58\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 5,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nOrganizational Structure\\nBusiness Unit Structure\\n- **Telecom Infrastructure (620 employees):** 5G/6G base station components, RF filters.\\n- **Aerospace & Defence (510 employees):** Radar systems, secure comms, satellite components.\\n- **Compound Semiconductor Fab (300 employees):** R&D and production of GaN/GaAs wafers.\\n- **Corporate Functions (170 employees):** Finance, HR, Legal, Sales.\",\r\n\t\t\t\"raw_text\": \"- **Telecom Infrastructure (620 employees):** 5G/6G base station components, RF filters.\\n- **Aerospace & Defence (510 employees):** Radar systems, secure comms, satellite components.\\n- **Compound Semiconductor Fab (300 employees):** R&D and production of GaN/GaAs wafers.\\n- **Corporate Functions (170 employees):** Finance, HR, Legal, Sales.\",\r\n\t\t\t\"num_tokens\": 108,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Organizational Structure\",\r\n\t\t\t\t\"Business Unit Structure\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/62\",\r\n\t\t\t\t\"#/texts/65\",\r\n\t\t\t\t\"#/texts/68\",\r\n\t\t\t\t\"#/texts/71\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 6,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nFinancial Performance (2022-2024)\\nRevenue Growth Trajectory (in Pound Sterling)\\n2022, Total Revenue = £290.8M. 2022, YoY Growth = +65.1%. 2022, Gross Margin = 48.2%. 2022, Operating Margin = 13.1%. 2022, Net Margin = 9.8%. 2023, Total Revenue = £410.2M. 2023, YoY Growth = +41.1%. 2023, Gross Margin = 51.9%. 2023, Operating Margin = 17.4%. 2023, Net Margin = 13.5%. 2024, Total Revenue = £535.5M. 2024, YoY Growth = +30.5%. 2024, Gross Margin = 54.3%. 2024, Operating Margin = 20.2%. 2024, Net Margin = 16.1%\",\r\n\t\t\t\"raw_text\": \"2022, Total Revenue = £290.8M. 2022, YoY Growth = +65.1%. 2022, Gross Margin = 48.2%. 2022, Operating Margin = 13.1%. 2022, Net Margin = 9.8%. 2023, Total Revenue = £410.2M. 2023, YoY Growth = +41.1%. 2023, Gross Margin = 51.9%. 2023, Operating Margin = 17.4%. 2023, Net Margin = 13.5%. 2024, Total Revenue = £535.5M. 2024, YoY Growth = +30.5%. 2024, Gross Margin = 54.3%. 2024, Operating Margin = 20.2%. 2024, Net Margin = 16.1%\",\r\n\t\t\t\"num_tokens\": 200,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Financial Performance (2022-2024)\",\r\n\t\t\t\t\"Revenue Growth Trajectory (in Pound Sterling)\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/tables/0\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 7,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nFinancial Performance (2022-2024)\\nRevenue by Business Unit (2024)\\nTelecom Infrastructure, Revenue = £242.0M. Telecom Infrastructure, % of Total = 45.2%. Telecom Infrastructure, YoY Growth = +33.1%. Aerospace & Defence, Revenue = £209.4M. Aerospace & Defence, % of Total = 39.1%. Aerospace & Defence, YoY Growth = +27.5%. Compound Semiconductor Fab, Revenue = £84.1M. Compound Semiconductor Fab, % of Total = 15.7%. Compound Semiconductor Fab, YoY Growth = +31.8%\",\r\n\t\t\t\"raw_text\": \"Telecom Infrastructure, Revenue = £242.0M. Telecom Infrastructure, % of Total = 45.2%. Telecom Infrastructure, YoY Growth = +33.1%. Aerospace & Defence, Revenue = £209.4M. Aerospace & Defence, % of Total = 39.1%. Aerospace & Defence, YoY Growth = +27.5%. Compound Semiconductor Fab, Revenue = £84.1M. Compound Semiconductor Fab, % of Total = 15.7%. Compound Semiconductor Fab, YoY Growth = +31.8%\",\r\n\t\t\t\"num_tokens\": 144,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Financial Performance (2022-2024)\",\r\n\t\t\t\t\"Revenue by Business Unit (2024)\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/tables/1\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 8,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nFinancial Performance (2022-2024)\\nKey Financial Metrics (2024)\\n- **R&D Investment:** £98.5M (18.4% of revenue)\\n- **Cash Position:** £121.0M\\n- **Employee Productivity:** £335K revenue per employee\\n- **International Revenue:** 72% of total revenue\\n- **Fab & Fabless:** Hybrid model; operates its own compound semi fab but outsources digital.\",\r\n\t\t\t\"raw_text\": \"- **R&D Investment:** £98.5M (18.4% of revenue)\\n- **Cash Position:** £121.0M\\n- **Employee Productivity:** £335K revenue per employee\\n- **International Revenue:** 72% of total revenue\\n- **Fab & Fabless:** Hybrid model; operates its own compound semi fab but outsources digital.\",\r\n\t\t\t\"num_tokens\": 117,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Financial Performance (2022-2024)\",\r\n\t\t\t\t\"Key Financial Metrics (2024)\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/78\",\r\n\t\t\t\t\"#/texts/81\",\r\n\t\t\t\t\"#/texts/84\",\r\n\t\t\t\t\"#/texts/87\",\r\n\t\t\t\t\"#/texts/90\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 9,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nTechnology Infrastructure & Computing Requirements\\nHigh-Performance Computing Architecture\\nBritannic Circuits relies on HPC for complex electromagnetic (EM) simulation, material science modeling, and chip design.\\n**AI & Machine Learning Infrastructure:**\\n- **High-Core-Count CPUs:** Running complex RF and EM simulations (e.g., Ansys HFSS) which are CPU-intensive.\\n- **High-Memory GPUs:** Used for AI-driven signal processing R&D and accelerating material science simulations.\\n- **High-Speed Memory:** Essential for handling the large datasets generated by RF simulations.\\n**Cloud & Edge Computing:**\\n- **Server-Grade Processors:** Internal servers for managing fab data and design IP.\\n- **FPGA Prototyping:** Prototyping new radar and communication controller logic.\\n- **Security Processors:** Hardware-based encryption is critical for their defense-related IP.\",\r\n\t\t\t\"raw_text\": \"Britannic Circuits relies on HPC for complex electromagnetic (EM) simulation, material science modeling, and chip design.\\n**AI & Machine Learning Infrastructure:**\\n- **High-Core-Count CPUs:** Running complex RF and EM simulations (e.g., Ansys HFSS) which are CPU-intensive.\\n- **High-Memory GPUs:** Used for AI-driven signal processing R&D and accelerating material science simulations.\\n- **High-Speed Memory:** Essential for handling the large datasets generated by RF simulations.\\n**Cloud & Edge Computing:**\\n- **Server-Grade Processors:** Internal servers for managing fab data and design IP.\\n- **FPGA Prototyping:** Prototyping new radar and communication controller logic.\\n- **Security Processors:** Hardware-based encryption is critical for their defense-related IP.\",\r\n\t\t\t\"num_tokens\": 214,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Technology Infrastructure & Computing Requirements\",\r\n\t\t\t\t\"High-Performance Computing Architecture\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/95\",\r\n\t\t\t\t\"#/texts/96\",\r\n\t\t\t\t\"#/texts/97\",\r\n\t\t\t\t\"#/texts/100\",\r\n\t\t\t\t\"#/texts/103\",\r\n\t\t\t\t\"#/texts/106\",\r\n\t\t\t\t\"#/texts/107\",\r\n\t\t\t\t\"#/texts/110\",\r\n\t\t\t\t\"#/texts/113\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 10,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nTechnology Infrastructure & Computing Requirements\\nStrategic Technology Partnerships\\n- **BAE Systems:** Key partner for defense systems integration.\\n- **Airbus:** Supplier for satellite communication modules.\\n- **ARM:** Partner in the Cambridge \\\"Silicon Fen\\\" ecosystem, collaboration on IoT.\\n- **University of Cambridge:** Joint R&D on compound semiconductors.\",\r\n\t\t\t\"raw_text\": \"- **BAE Systems:** Key partner for defense systems integration.\\n- **Airbus:** Supplier for satellite communication modules.\\n- **ARM:** Partner in the Cambridge \\\"Silicon Fen\\\" ecosystem, collaboration on IoT.\\n- **University of Cambridge:** Joint R&D on compound semiconductors.\",\r\n\t\t\t\"num_tokens\": 85,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Technology Infrastructure & Computing Requirements\",\r\n\t\t\t\t\"Strategic Technology Partnerships\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/117\",\r\n\t\t\t\t\"#/texts/120\",\r\n\t\t\t\t\"#/texts/123\",\r\n\t\t\t\t\"#/texts/126\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 11,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nMarket Position & Competitive Landscape\\nCompetitive Advantages\\n1. **Sovereign Capability:** One of the few UK firms with end-to-end RF design and compound semi-fab capabilities.\\n2. **High-Frequency Expertise:** World-class IP in GaN and high-frequency RF systems.\\n3. **High-Barrier Market:** Operates in defense and aerospace sectors with high trust and certification requirements.\\n4. **Strong Government Ties:** Key supplier to the UK Ministry of Defence (MoD) and EU space programs.\",\r\n\t\t\t\"raw_text\": \"1. **Sovereign Capability:** One of the few UK firms with end-to-end RF design and compound semi-fab capabilities.\\n2. **High-Frequency Expertise:** World-class IP in GaN and high-frequency RF systems.\\n3. **High-Barrier Market:** Operates in defense and aerospace sectors with high trust and certification requirements.\\n4. **Strong Government Ties:** Key supplier to the UK Ministry of Defence (MoD) and EU space programs.\",\r\n\t\t\t\"num_tokens\": 121,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Market Position & Competitive Landscape\",\r\n\t\t\t\t\"Competitive Advantages\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/131\",\r\n\t\t\t\t\"#/texts/134\",\r\n\t\t\t\t\"#/texts/137\",\r\n\t\t\t\t\"#/texts/140\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 12,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nMarket Position & Competitive Landscape\\nKey Clients\\n- **UK Ministry of Defence (MoD)**\\n- **Ericsson**\\n- **Nokia**\\n- **Inmarsat (Viasat)**\\n- **Major NATO-aligned defense contractors**\",\r\n\t\t\t\"raw_text\": \"- **UK Ministry of Defence (MoD)**\\n- **Ericsson**\\n- **Nokia**\\n- **Inmarsat (Viasat)**\\n- **Major NATO-aligned defense contractors**\",\r\n\t\t\t\"num_tokens\": 64,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Market Position & Competitive Landscape\",\r\n\t\t\t\t\"Key Clients\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/144\",\r\n\t\t\t\t\"#/texts/145\",\r\n\t\t\t\t\"#/texts/146\",\r\n\t\t\t\t\"#/texts/147\",\r\n\t\t\t\t\"#/texts/148\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t},\r\n\t\t{\r\n\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\"chunk_index\": 13,\r\n\t\t\t\"text\": \"Britannic Circuits Ltd. - Corporate Information\\nAccount & Logistics Information\\n- **Customer ID:** 7\\n- **Account Created:** 2025-07-22T08:34:15.276517Z\\n- **Billing Address:** 7 London Wall, London, UK\\n- **Shipping Address:** 7 London Wall, London, UK\\n**Document Classification:**\\nConfidential - Fictional Profile\\n**Last Updated:**\\nAugust 2025\",\r\n\t\t\t\"raw_text\": \"- **Customer ID:** 7\\n- **Account Created:** 2025-07-22T08:34:15.276517Z\\n- **Billing Address:** 7 London Wall, London, UK\\n- **Shipping Address:** 7 London Wall, London, UK\\n**Document Classification:**\\nConfidential - Fictional Profile\\n**Last Updated:**\\nAugust 2025\",\r\n\t\t\t\"num_tokens\": 99,\r\n\t\t\t\"headings\": [\r\n\t\t\t\t\"Britannic Circuits Ltd. - Corporate Information\",\r\n\t\t\t\t\"Account & Logistics Information\"\r\n\t\t\t],\r\n\t\t\t\"captions\": \"\",\r\n\t\t\t\"doc_items\": [\r\n\t\t\t\t\"#/texts/150\",\r\n\t\t\t\t\"#/texts/153\",\r\n\t\t\t\t\"#/texts/156\",\r\n\t\t\t\t\"#/texts/159\",\r\n\t\t\t\t\"#/texts/162\",\r\n\t\t\t\t\"#/texts/163\",\r\n\t\t\t\t\"#/texts/164\",\r\n\t\t\t\t\"#/texts/165\"\r\n\t\t\t],\r\n\t\t\t\"page_numbers\": [],\r\n\t\t\t\"metadata\": {\r\n\t\t\t\t\"origin\": {\r\n\t\t\t\t\t\"mimetype\": \"text/markdown\",\r\n\t\t\t\t\t\"binary_hash\": 15177482475593979655,\r\n\t\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\t\"uri\": \"\"\r\n\t\t\t\t}\r\n\t\t\t}\r\n\t\t}\r\n\t],\r\n\t\"documents\": [\r\n\t\t{\r\n\t\t\t\"kind\": \"ExportResult\",\r\n\t\t\t\"content\": {\r\n\t\t\t\t\"filename\": \"britannic_circuits_ltd_profile.md\",\r\n\t\t\t\t\"md_content\": \"\",\r\n\t\t\t\t\"json_content\": \"\",\r\n\t\t\t\t\"html_content\": \"\",\r\n\t\t\t\t\"text_content\": \"\",\r\n\t\t\t\t\"doctags_content\": \"\"\r\n\t\t\t},\r\n\t\t\t\"status\": \"success\",\r\n\t\t\t\"errors\": [],\r\n\t\t\t\"timings\": {}\r\n\t\t}\r\n\t],\r\n\t\"processing_time\": 24.948277823999888\r\n}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "LogMessage1",
+            "name": "LogMessage1",
+            "description": "Simple Log Message Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "Log Level": "INFO",
+                "flowInfo": false,
+                "message": "=string.concat(\"Loading content of:\",$property[\"FilesDirectory\"],\"/\",$flow.filename)",
+                "logLevel": ""
+              }
+            }
+          },
+          {
+            "id": "ReadFile",
+            "name": "ReadFile",
+            "description": "This activity reads the content of a file",
+            "activity": {
+              "ref": "#read",
+              "input": {
+                "readAs": "Text",
+                "compress": "None",
+                "input": {
+                  "mapping": {
+                    "fileName": "=string.concat($property[\"FilesDirectory\"],\"/\",$flow.filename)"
+                  }
+                }
+              },
+              "schemas": {
+                "input": {
+                  "input": {
+                    "type": "json",
+                    "value": "{\"properties\":{\"fileName\":{\"type\":\"string\"}},\"required\":[\"fileName\"],\"type\":\"object\"}",
+                    "fe_metadata": "{\"properties\":{\"fileName\":{\"type\":\"string\"}},\"required\":[\"fileName\"],\"type\":\"object\"}"
+                  }
+                },
+                "output": {
+                  "output": {
+                    "type": "json",
+                    "value": "{\"properties\":{\"fileMetadata\":{\"properties\":{\"fullPath\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"size\":{\"type\":\"number\"},\"mode\":{\"type\":\"string\"},\"modTime\":{\"type\":\"string\",\"format\":\"date-time\"},\"isDir\":{\"type\":\"boolean\"}},\"type\":\"object\"},\"fileContent\":{\"properties\":{\"textContent\":{\"type\":\"string\"}},\"type\":\"object\"}},\"type\":\"object\"}",
+                    "fe_metadata": "{\"properties\":{\"fileMetadata\":{\"properties\":{\"fullPath\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"size\":{\"type\":\"number\"},\"mode\":{\"type\":\"string\"},\"modTime\":{\"type\":\"string\",\"format\":\"date-time\"},\"isDir\":{\"type\":\"boolean\"}},\"type\":\"object\"},\"fileContent\":{\"properties\":{\"textContent\":{\"type\":\"string\"}},\"type\":\"object\"}},\"type\":\"object\"}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "LogMessage",
+            "name": "LogMessage",
+            "description": "Simple Log Message Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "Log Level": "INFO",
+                "flowInfo": false,
+                "message": "=$activity[ReadFile].output.fileContent.textContent",
+                "logLevel": ""
+              }
+            }
+          },
+          {
+            "id": "DocumentDetails",
+            "name": "DocumentDetails",
+            "description": "This activity creates a new entries in the vector store",
+            "settings": {
+              "retryOnError": {
+                "count": 0,
+                "interval": 0
+              }
+            },
+            "activity": {
+              "ref": "#documentDetails",
+              "settings": {
+                "apiKey": "",
+                "vectorDBUrl": "=$property[\"AsDocumentStoreHostAndPort\"]",
+                "documentStore": "=$property[\"DocumentStore\"]",
+                "action": "New"
+              },
+              "input": {
+                "docTitle": "=string.concat(\"Loading content of:\",$property[\"FilesDirectory\"],\"/\",$flow.filename)",
+                "status": "",
+                "vectorStore": "=$property[\"VectorStore\"]",
+                "metaData": "=string.concat(\"{'rawtext':\",\"'\",string.stringToBase64($activity[ReadFile].output.fileContent.textContent),\"'}\")"
+              }
+            }
+          },
+          {
+            "id": "StartaSubFlow",
+            "name": "StartaSubFlow",
+            "description": "Simple SubFlow Activity",
+            "type": "iterator",
+            "settings": {
+              "iterate": "=$activity[ParseJSON].jsonObject.chunks",
+              "accumulate": false,
+              "retryOnError": {
+                "count": 0,
+                "interval": 0
+              }
+            },
+            "activity": {
+              "ref": "#subflow",
+              "settings": {
+                "flowURI": "res://flow:IterateOverChunks",
+                "detached": false
+              },
+              "input": {
+                "filename": "=$iteration[value].filename",
+                "chunk_index": "=$iteration[value].chunk_index",
+                "text": "=$iteration[value].text",
+                "raw_text": "=$iteration[value].raw_text",
+                "num_tokens": "=$iteration[value].num_tokens",
+                "headings": "=$iteration[value].headings",
+                "captions": "=$iteration[value].captions",
+                "doc_items": "=$iteration[value].doc_items",
+                "page_numbers": {
+                  "mapping": {
+                    "@foreach($iteration[value].page_numbers,page_numbers)": {
+                      "=": "$loop"
+                    }
+                  }
+                },
+                "metadata": "=$iteration[value].metadata",
+                "documentID": "=$activity[DocumentDetails].docID"
+              },
+              "schemas": {
+                "input": {
+                  "input": {
+                    "type": "json",
+                    "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"},\"chunk_index\":{\"type\":\"number\"},\"text\":{\"type\":\"string\"},\"raw_text\":{\"type\":\"string\"},\"num_tokens\":{\"type\":\"number\"},\"headings\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"captions\":{\"type\":\"string\"},\"doc_items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"page_numbers\":{\"type\":\"array\",\"items\":{}},\"metadata\":{\"type\":\"object\",\"properties\":{\"origin\":{\"type\":\"object\",\"properties\":{\"mimetype\":{\"type\":\"string\"},\"binary_hash\":{\"type\":\"number\"},\"filename\":{\"type\":\"string\"},\"uri\":{\"type\":\"string\"}}}}},\"documentID\":{\"type\":\"number\"}}}",
+                    "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"},\"chunk_index\":{\"type\":\"number\"},\"text\":{\"type\":\"string\"},\"raw_text\":{\"type\":\"string\"},\"num_tokens\":{\"type\":\"number\"},\"headings\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"captions\":{\"type\":\"string\"},\"doc_items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"page_numbers\":{\"type\":\"array\",\"items\":{}},\"metadata\":{\"type\":\"object\",\"properties\":{\"origin\":{\"type\":\"object\",\"properties\":{\"mimetype\":{\"type\":\"string\"},\"binary_hash\":{\"type\":\"number\"},\"filename\":{\"type\":\"string\"},\"uri\":{\"type\":\"string\"}}}}},\"documentID\":{\"type\":\"number\"}}}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "Return",
+            "name": "Return",
+            "description": "Simple Return Activity",
+            "activity": {
+              "ref": "#actreturn"
+            }
+          }
+        ],
+        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjAsInkiOjg5fSwiQ2h1bmthdGV4dCI6eyJ4IjoxODksInkiOjgwfSwiUGFyc2VKU09OIjp7IngiOjM4NSwieSI6ODV9LCJMb2dNZXNzYWdlMSI6eyJ4Ijo2MTUsInkiOjgzfSwiUmVhZEZpbGUiOnsieCI6ODAzLCJ5Ijo4MH0sIkxvZ01lc3NhZ2UiOnsieCI6NTcsInkiOjI1Nn0sIkRvY3VtZW50RGV0YWlscyI6eyJ4IjozMzQsInkiOjI1OX0sIlN0YXJ0YVN1YkZsb3ciOnsieCI6NjM1LCJ5IjoyNTh9LCJSZXR1cm4iOnsieCI6ODExLCJ5IjoyNjJ9fQ==",
+        "metadata": {
+          "input": [
+            {
+              "name": "filename",
+              "type": "string"
+            }
+          ],
+          "output": [],
+          "fe_metadata": {
+            "input": "{\n    \"filename\":\"filename\"\n}"
+          }
+        }
+      }
+    },
+    {
+      "id": "flow:IterateOverChunks",
+      "data": {
+        "name": "IterateOverChunks",
+        "description": "",
+        "links": [
+          {
+            "id": 1,
+            "from": "StartActivity",
+            "to": "LogChunkText",
+            "type": "label",
+            "label": "StartActivity to LogChunkText"
+          },
+          {
+            "id": 2,
+            "from": "LogChunkText",
+            "to": "StartaSubFlow",
+            "type": "label",
+            "label": "LogChunkText to StartaSubFlow"
+          },
+          {
+            "id": 3,
+            "from": "StartaSubFlow",
+            "to": "Return",
+            "type": "label",
+            "label": "StartaSubFlow to Return"
+          }
+        ],
+        "tasks": [
+          {
+            "id": "StartActivity",
+            "name": "StartActivity",
+            "description": "NoOp Activity",
+            "activity": {
+              "ref": "#noop"
+            }
+          },
+          {
+            "id": "LogChunkText",
+            "name": "LogChunkText",
+            "description": "Simple Log Message Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "Log Level": "INFO",
+                "flowInfo": false,
+                "message": "=string.concat(\"Chunk content: \",$flow.raw_text)",
+                "logLevel": ""
+              }
+            }
+          },
+          {
+            "id": "StartaSubFlow",
+            "name": "StartaSubFlow",
+            "description": "Simple SubFlow Activity",
+            "settings": {
+              "retryOnError": {
+                "count": 0,
+                "interval": 0
+              }
+            },
+            "activity": {
+              "ref": "#subflow",
+              "settings": {
+                "flowURI": "res://flow:CreateEmbeddingAndStore",
+                "detached": false
+              },
+              "input": {
+                "docID": "=$flow.documentID",
+                "chunkNumber": "=$flow.chunk_index",
+                "chunkText": "=$flow.raw_text"
+              },
+              "schemas": {
+                "input": {
+                  "input": {
+                    "type": "json",
+                    "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"docID\":{\"type\":\"integer\"},\"chunkNumber\":{\"type\":\"integer\"},\"chunkText\":{\"type\":\"string\"},\"metaData\":{\"type\":\"string\"}}}",
+                    "fe_metadata": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"docID\":{\"type\":\"integer\"},\"chunkNumber\":{\"type\":\"integer\"},\"chunkText\":{\"type\":\"string\"},\"metaData\":{\"type\":\"string\"}}}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "Return",
+            "name": "Return",
+            "description": "Simple Return Activity",
+            "activity": {
+              "ref": "#actreturn"
+            }
+          }
+        ],
+        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjEwMSwieSI6MTAxfSwiTG9nQ2h1bmtUZXh0Ijp7IngiOjI3OCwieSI6OTh9LCJTdGFydGFTdWJGbG93Ijp7IngiOjU1MCwieSI6OTl9LCJSZXR1cm4iOnsieCI6NzYyLCJ5IjoxMDN9fQ==",
+        "metadata": {
+          "input": [
+            {
+              "name": "filename",
+              "type": "string"
+            },
+            {
+              "name": "chunk_index",
+              "type": "float64"
+            },
+            {
+              "name": "text",
+              "type": "string"
+            },
+            {
+              "name": "raw_text",
+              "type": "string"
+            },
+            {
+              "name": "num_tokens",
+              "type": "float64"
+            },
+            {
+              "name": "headings",
+              "type": "array",
+              "schema": {
+                "type": "json",
+                "value": "{\"type\":\"string\"}"
+              }
+            },
+            {
+              "name": "captions",
+              "type": "string"
+            },
+            {
+              "name": "doc_items",
+              "type": "array",
+              "schema": {
+                "type": "json",
+                "value": "{\"type\":\"string\"}"
+              }
+            },
+            {
+              "name": "page_numbers",
+              "type": "array"
+            },
+            {
+              "name": "metadata",
+              "type": "object",
+              "schema": {
+                "type": "json",
+                "value": "{\"origin\":{\"type\":\"object\",\"properties\":{\"mimetype\":{\"type\":\"string\"},\"binary_hash\":{\"type\":\"number\"},\"filename\":{\"type\":\"string\"},\"uri\":{\"type\":\"string\"}}}}"
+              }
+            },
+            {
+              "name": "documentID",
+              "type": "float64"
+            }
+          ],
+          "output": [],
+          "fe_metadata": {
+            "input": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"},\"chunk_index\":{\"type\":\"number\"},\"text\":{\"type\":\"string\"},\"raw_text\":{\"type\":\"string\"},\"num_tokens\":{\"type\":\"number\"},\"headings\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"captions\":{\"type\":\"string\"},\"doc_items\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"page_numbers\":{\"type\":\"array\",\"items\":{}},\"metadata\":{\"type\":\"object\",\"properties\":{\"origin\":{\"type\":\"object\",\"properties\":{\"mimetype\":{\"type\":\"string\"},\"binary_hash\":{\"type\":\"number\"},\"filename\":{\"type\":\"string\"},\"uri\":{\"type\":\"string\"}}}}},\"documentID\":{\"type\":\"number\"}}}"
+          }
+        }
+      }
+    },
+    {
+      "id": "flow:Main",
+      "data": {
+        "name": "Main",
+        "description": "",
+        "links": [
+          {
+            "id": 1,
+            "from": "StartActivity",
+            "to": "ListFiles",
+            "type": "label",
+            "label": "StartActivity to ListFiles"
+          },
+          {
+            "id": 2,
+            "from": "ListFiles",
+            "to": "LogMessage",
+            "type": "label",
+            "label": "ListFiles to LogMessage"
+          },
+          {
+            "id": 3,
+            "from": "LogMessage",
+            "to": "StartaSubFlow",
+            "type": "label",
+            "label": "LogMessage to StartaSubFlow"
+          },
+          {
+            "id": 4,
+            "from": "StartaSubFlow",
+            "to": "Return",
+            "type": "label",
+            "label": "StartaSubFlow to Return"
+          }
+        ],
+        "tasks": [
+          {
+            "id": "StartActivity",
+            "name": "StartActivity",
+            "description": "NoOp Activity",
+            "activity": {
+              "ref": "#noop"
+            }
+          },
+          {
+            "id": "ListFiles",
+            "name": "ListFiles",
+            "description": "This activity lists all the files or directories in the specified directory",
+            "activity": {
+              "ref": "#list",
+              "input": {
+                "mode": "Only Files",
+                "input": {
+                  "mapping": {
+                    "fileName": "=string.concat($property[\"FilesDirectory\"],\"/*.md\")"
+                  }
+                }
+              },
+              "schemas": {
+                "input": {
+                  "input": {
+                    "type": "json",
+                    "value": "{\"properties\":{\"fileName\":{\"type\":\"string\"}},\"required\":[\"fileName\"],\"type\":\"object\"}",
+                    "fe_metadata": "{\"properties\":{\"fileName\":{\"type\":\"string\"}},\"required\":[\"fileName\"],\"type\":\"object\"}"
+                  }
+                },
+                "output": {
+                  "output": {
+                    "type": "json",
+                    "value": "{\"properties\":{\"fileMetadata\":{\"items\":{\"properties\":{\"fullPath\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"size\":{\"type\":\"number\"},\"mode\":{\"type\":\"string\"},\"modTime\":{\"type\":\"string\",\"format\":\"date-time\"},\"isDir\":{\"type\":\"boolean\"}},\"type\":\"object\"},\"type\":\"array\"}},\"type\":\"object\"}",
+                    "fe_metadata": "{\"properties\":{\"fileMetadata\":{\"items\":{\"properties\":{\"fullPath\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"size\":{\"type\":\"number\"},\"mode\":{\"type\":\"string\"},\"modTime\":{\"type\":\"string\",\"format\":\"date-time\"},\"isDir\":{\"type\":\"boolean\"}},\"type\":\"object\"},\"type\":\"array\"}},\"type\":\"object\"}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "LogMessage",
+            "name": "LogMessage",
+            "description": "Simple Log Message Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "Log Level": "INFO",
+                "flowInfo": false,
+                "message": "=coerce.toString(coerce.toString($activity[ListFiles].output.fileMetadata))",
+                "logLevel": ""
+              }
+            }
+          },
+          {
+            "id": "StartaSubFlow",
+            "name": "StartaSubFlow",
+            "description": "Simple SubFlow Activity",
+            "type": "iterator",
+            "settings": {
+              "iterate": "=$activity[ListFiles].output.fileMetadata",
+              "accumulate": false,
+              "retryOnError": {
+                "count": 0,
+                "interval": 0
+              }
+            },
+            "activity": {
+              "ref": "#subflow",
+              "settings": {
+                "flowURI": "res://flow:Chunkfile",
+                "detached": false
+              },
+              "input": {
+                "filename": "=$iteration[value].name"
+              },
+              "schemas": {
+                "input": {
+                  "input": {
+                    "type": "json",
+                    "value": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"}}}",
+                    "fe_metadata": "{\n    \"filename\":\"filename\"\n}"
+                  }
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "Return",
+            "name": "Return",
+            "description": "Simple Return Activity",
+            "activity": {
+              "ref": "#actreturn"
+            }
+          }
+        ],
+        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjEwMCwieSI6MTAwfSwiTGlzdEZpbGVzIjp7IngiOjE5MywieSI6MTEzfSwiTG9nTWVzc2FnZSI6eyJ4Ijo0NDEsInkiOjEzMH0sIlN0YXJ0YVN1YkZsb3ciOnsieCI6Njg1LCJ5IjoxMjV9LCJSZXR1cm4iOnsieCI6ODg5LCJ5IjoxMzB9fQ==",
+        "metadata": {
+          "input": [
+            {
+              "name": "headers",
+              "type": "object",
+              "schema": {
+                "type": "json",
+                "value": "{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}}"
+              }
+            },
+            {
+              "name": "body",
+              "type": "array",
+              "schema": {
+                "type": "json",
+                "value": "{\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"}},\"required\":[\"filename\"]}"
+              }
+            },
+            {
+              "name": "requestURI",
+              "type": "string"
+            },
+            {
+              "name": "method",
+              "type": "string"
+            }
+          ],
+          "output": [
+            {
+              "name": "code",
+              "type": "integer"
+            },
+            {
+              "name": "data",
+              "type": "object",
+              "schema": {
+                "type": "json",
+                "value": "{\"response\":{\"type\":\"string\"}}"
+              }
+            }
+          ],
+          "fe_metadata": {
+            "input": "{\"type\":\"object\",\"title\":\"ReceiveHTTPMessage\",\"properties\":{\"headers\":{\"type\":\"object\",\"properties\":{\"Accept\":{\"type\":\"string\",\"visible\":false},\"Accept-Charset\":{\"type\":\"string\",\"visible\":false},\"Accept-Encoding\":{\"type\":\"string\",\"visible\":false},\"Content-Type\":{\"type\":\"string\",\"visible\":false},\"Content-Length\":{\"type\":\"string\",\"visible\":false},\"Connection\":{\"type\":\"string\",\"visible\":false},\"Cookie\":{\"type\":\"string\",\"visible\":false},\"Pragma\":{\"type\":\"string\",\"visible\":false}},\"required\":[]},\"body\":{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"filename\":{\"type\":\"string\"}},\"required\":[\"filename\"]}},\"requestURI\":{\"type\":\"string\",\"required\":false},\"method\":{\"type\":\"string\",\"required\":false}}}",
+            "output": "{\"type\":\"object\",\"title\":\"Inputs\",\"properties\":{\"code\":{\"type\":\"integer\",\"required\":false},\"data\":{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"response\":{\"type\":\"string\"}}}},\"required\":[]}"
+          }
+        }
+      }
+    },
+    {
+      "id": "flow:CreateEmbeddingAndStore",
+      "data": {
+        "name": "CreateEmbeddingAndStore",
+        "description": "",
+        "links": [
+          {
+            "id": 1,
+            "from": "StartActivity",
+            "to": "Createanembedding",
+            "type": "label",
+            "label": "StartActivity to Createanembedding1"
+          },
+          {
+            "id": 2,
+            "from": "Createanembedding",
+            "to": "LogMessage1",
+            "type": "label",
+            "label": "Createanembedding to LogMessage1"
+          },
+          {
+            "id": 3,
+            "from": "LogMessage1",
+            "to": "ParseJSON",
+            "type": "label",
+            "label": "LogMessage1 to ParseJSON"
+          },
+          {
+            "id": 4,
+            "from": "ParseJSON",
+            "to": "NewVectorentry",
+            "type": "label",
+            "label": "ParseJSON to NewVectorentry"
+          },
+          {
+            "id": 5,
+            "from": "NewVectorentry",
+            "to": "Return",
+            "type": "label",
+            "label": "NewVectorentry to Return"
+          }
+        ],
+        "tasks": [
+          {
+            "id": "StartActivity",
+            "name": "StartActivity",
+            "description": "NoOp Activity",
+            "activity": {
+              "ref": "#noop"
+            }
+          },
+          {
+            "id": "Createanembedding",
+            "name": "Createanembedding",
+            "description": "Create an embedding from a text",
+            "activity": {
+              "ref": "#embedding",
+              "settings": {
+                "EmbeddingEngine": "ollama",
+                "EmbeddingModel": "nomic-embed-text",
+                "EmbeddingModelVersion": "latest",
+                "EmbeddingURL": "=$property[\"embeddingURL\"]",
+                "EmbeddingPort": "=$property[\"embeddingPort\"]"
+              },
+              "input": {
+                "InputText": "=$flow.chunkText"
+              }
+            }
+          },
+          {
+            "id": "LogMessage1",
+            "name": "LogMessage1",
+            "description": "Simple Log Message Activity",
+            "activity": {
+              "ref": "#log",
+              "input": {
+                "Log Level": "INFO",
+                "flowInfo": false,
+                "message": "=string.concat(\"Error:\",$activity[Createanembedding].ErrorMessage)",
+                "logLevel": ""
+              }
+            }
+          },
+          {
+            "id": "ParseJSON",
+            "name": "ParseJSON",
+            "description": "Parses JSON string into JSON object",
+            "activity": {
+              "ref": "#parsejson",
+              "input": {
+                "validate": false,
+                "jsonString": "=$activity[Createanembedding].EmbeddingJSON"
+              },
+              "schemas": {
+                "output": {
+                  "jsonObject": "schema://Embedding"
+                }
+              },
+              "feSchemaMap": {}
+            }
+          },
+          {
+            "id": "NewVectorentry",
+            "name": "NewVectorentry",
+            "description": "This activity creates a new entries in the vector store",
+            "settings": {
+              "retryOnError": {
+                "count": 0,
+                "interval": 0
+              }
+            },
+            "activity": {
+              "ref": "#newVector",
+              "settings": {
+                "apiKey": "",
+                "vectorDBUrl": "=$property[\"AsVectorStoreHostAndPort\"]",
+                "vectorStore": "=$property[\"VectorStore\"]"
+              },
+              "input": {
+                "docID": "=$flow.docID",
+                "chunkNumber": "=$flow.chunkNumber",
+                "chunkText": "=$flow.chunkText",
+                "embedding": "=coerce.toString($activity[ParseJSON].jsonObject.embeddings[0])",
+                "metaData": "=$flow.metaData"
+              }
+            }
+          },
+          {
+            "id": "Return",
+            "name": "Return",
+            "description": "Simple Return Activity",
+            "activity": {
+              "ref": "#actreturn"
+            }
+          }
+        ],
+        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjEwMCwieSI6MTAwfSwiQ3JlYXRlYW5lbWJlZGRpbmciOnsieCI6MjM3LCJ5Ijo5MX0sIkxvZ01lc3NhZ2UxIjp7IngiOjQ0MCwieSI6OTN9LCJQYXJzZUpTT04iOnsieCI6Njg0LCJ5IjoxMDB9LCJOZXdWZWN0b3JlbnRyeSI6eyJ4Ijo4ODYsInkiOjg5fSwiUmV0dXJuIjp7IngiOjEwNTUsInkiOjk2fX0=",
+        "metadata": {
+          "input": [
+            {
+              "name": "docID",
+              "type": "integer"
+            },
+            {
+              "name": "chunkNumber",
+              "type": "integer"
+            },
+            {
+              "name": "chunkText",
+              "type": "string"
+            },
+            {
+              "name": "metaData",
+              "type": "string"
+            }
+          ],
+          "output": [],
+          "fe_metadata": {
+            "input": "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"type\":\"object\",\"properties\":{\"docID\":{\"type\":\"integer\"},\"chunkNumber\":{\"type\":\"integer\"},\"chunkText\":{\"type\":\"string\"},\"metaData\":{\"type\":\"string\"}}}"
+          }
+        }
+      }
+    }
+  ],
+  "properties": [
+    {
+      "name": "Port",
+      "type": "float64",
+      "value": 9999
+    },
+    {
+      "name": "AsVectorStoreHostAndPort",
+      "type": "string",
+      "value": "localhost:50051"
+    },
+    {
+      "name": "VectorStore",
+      "type": "string",
+      "value": "vs_store_sampleas_doc"
+    },
+    {
+      "name": "DocumentStore",
+      "type": "string",
+      "value": "ds_store_sampleas"
+    },
+    {
+      "name": "AsDocumentStoreHostAndPort",
+      "type": "string",
+      "value": "localhost:50052"
+    },
+    {
+      "name": "Doclinghost",
+      "type": "string",
+      "value": "http://localhost"
+    },
+    {
+      "name": "Doclingport",
+      "type": "float64",
+      "value": 5001
+    },
+    {
+      "name": "embeddingPort",
+      "type": "float64",
+      "value": 11434
+    },
+    {
+      "name": "embeddingURL",
+      "type": "string",
+      "value": "http://localhost"
+    },
+    {
+      "name": "FilesDirectory",
+      "type": "string",
+      "value": "C:\\tmp\\aidownload"
+    }
+  ],
+  "schemas": {
+    "input": {
+      "type": "json",
+      "value": "{\r\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\r\n    \"type\": \"array\",\r\n    \"items\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n            \"filename\": {\r\n                \"type\": \"string\"\r\n            }\r\n        },\r\n        \"required\": [\"filename\"]\r\n    }\r\n}",
+      "fe_metadata": "{\r\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\r\n    \"type\": \"array\",\r\n    \"items\": {\r\n        \"type\": \"object\",\r\n        \"properties\": {\r\n            \"filename\": {\r\n                \"type\": \"string\"\r\n            }\r\n        },\r\n        \"required\": [\"filename\"]\r\n    }\r\n}"
+    },
+    "response": {
+      "type": "json",
+      "value": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"response\": {\n            \"type\": \"string\"\n        }\n    }\n}",
+      "fe_metadata": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"response\": {\n            \"type\": \"string\"\n        }\n    }\n}"
+    },
+    "chunkfileInput": {
+      "type": "json",
+      "value": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"filename\": {\n            \"type\": \"string\"\n        }\n    }\n}",
+      "fe_metadata": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"filename\": {\n            \"type\": \"string\"\n        }\n    }\n}"
+    },
+    "Embedding": {
+      "type": "json",
+      "value": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"dimensions\": {\n            \"type\": \"number\"\n        },\n        \"embeddings\": {\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"array\"\n            }\n        },\n        \"input_text\": {\n            \"type\": \"string\"\n        },\n        \"model\": {\n            \"type\": \"string\"\n        }\n    }\n}",
+      "fe_metadata": "{\n    \"$schema\": \"http://json-schema.org/draft-04/schema#\",\n    \"type\": \"object\",\n    \"properties\": {\n        \"dimensions\": {\n            \"type\": \"number\"\n        },\n        \"embeddings\": {\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"array\"\n            }\n        },\n        \"input_text\": {\n            \"type\": \"string\"\n        },\n        \"model\": {\n            \"type\": \"string\"\n        }\n    }\n}"
+    }
+  },
+  "connections": {},
+  "contrib": "W3sicmVmIjoiZ2l0bGFiLmNvbS9qdXJyaWFhbmJyYW5kc21hZmxvZ29leHRlbnNpb25zL2luZ2VzdGlvbiIsImlkIjoiaW5nZXN0aW9uIiwidmVyc2lvbiI6IjEuMC4wIiwidGFnIjoiMS4wLjAiLCJuYW1lIjoiVElCQ08gRmxvZ28gaW5nZXN0aW9uIENvbm5lY3RvciIsInMzbG9jYXRpb24iOiJ7VVNFUklEfS9pbmdlc3Rpb24iLCJpc1VzZXJFeHRlbnNpb24iOnRydWV9LHsicmVmIjoiZ2l0aHViLmNvbS90aWJjby9mbG9nby1nZW5lcmFsL3NyYy9hcHAvR2VuZXJhbCIsImlkIjoiR2VuZXJhbCIsInZlcnNpb24iOiIxLjYuOSIsInRhZyI6IjEuNi45LWIwNCIsIm5hbWUiOiJHZW5lcmFsIiwiczNsb2NhdGlvbiI6IlRpYmNvL0dlbmVyYWwiLCJpc1VzZXJFeHRlbnNpb24iOmZhbHNlfSx7InJlZiI6ImdpdGh1Yi5jb20vdGliY28vZmxvZ28tZmlsZXMvc3JjL2FwcC9GaWxlIiwiaWQiOiJGaWxlIiwidmVyc2lvbiI6IjEuMC4wIiwidGFnIjoiMS4wLjAtYjE0IiwibmFtZSI6IkZpbGUiLCJzM2xvY2F0aW9uIjoiVGliY28vRmlsZSIsImlzVXNlckV4dGVuc2lvbiI6ZmFsc2V9LHsicmVmIjoiZ2l0aHViLmNvbS9tYmxvb21maS10aWJjby9leHRlbnNpb25zL2FzVmVjdG9yREIiLCJpZCI6ImFzVmVjdG9yREIiLCJ2ZXJzaW9uIjoiMS4wLjAiLCJ0YWciOiIxLjAuMCIsIm5hbWUiOiJBY3RpdmVTcGFjZXMgREIiLCJzM2xvY2F0aW9uIjoie1VTRVJJRH0vYXNWZWN0b3JEQiIsImlzVXNlckV4dGVuc2lvbiI6dHJ1ZX1d",
+  "metadata": {
+    "endpoints": [],
+    "flogoVersion": "2.25.9"
+  }
+}
