@@ -1,0 +1,12 @@
+{
+  "AsDocumentStoreHostAndPort": "localhost:50052",
+  "AsVectorStoreHostAndPort": "localhost:50051",
+  "Doclinghost": "http://localhost",
+  "Doclingport": 5001,
+  "DocumentStore": "ds_store_sampleas",
+  "FilesDirectory": "..\\documents",
+  "Port": 9999,
+  "VectorStore": "vs_store_sampleas_doc",
+  "embeddingPort": 11434,
+  "embeddingURL": "http://localhost"
+}

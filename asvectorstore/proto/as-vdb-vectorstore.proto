@@ -1,0 +1,74 @@
+
+syntax = "proto3";
+
+option go_package = "github.com/mbloomfi-tibco/as-vdb-grpc/go/api/v1/vectorstore";
+option java_multiple_files = true;
+option java_package = "com.tibco.asvdb";
+option java_outer_classname = "vectorstore";
+
+package vectorstore;
+
+service Vectorstore {
+
+  rpc NewVector (NewVectorRequest) returns (NewVectorResponse) {}
+
+  rpc GetRows (VectorRow) returns (GetRowsRespnse) {} ;
+
+  rpc VectorSeach (VectorSearchCriteria) returns (SearchRespnse) {} ;
+
+}
+
+message VectorRow {
+   int64 vectorID = 1;
+   int64 docID = 2;
+   int64 chunkNumber = 3;
+   string chunkText = 4;
+   string embedding = 5;
+   string metadata = 6;
+}
+
+message NewVectorRow {
+   int64 docID = 1;
+   int64 chunkNumber = 2;
+   string chunkText = 3;
+   string embedding = 4;
+   string metadata = 5;
+}
+
+message VectorSearchRow {
+   int64 vectorID = 1;
+   int64 docID = 2;
+   int64 chunkNumber = 3;
+   string chunkText = 4;
+   string embedding = 5;
+   string metadata = 6;
+   double similarity = 7;
+}
+
+
+message NewVectorRequest {
+  string vectorstore = 1;
+  repeated NewVectorRow rows = 2;
+}
+
+message NewVectorResponse {
+  int32 success = 1;
+  repeated VectorRow rows = 2;
+}
+
+message VectorSearchCriteria {
+    string vectorstore = 1;
+    string embedding = 2;
+    string metadata = 3;
+    int64 resultLimit = 4;
+}
+
+message SearchRespnse {
+  int32 success = 1;
+  repeated VectorSearchRow rows = 2;
+}
+
+message GetRowsRespnse {
+  int32 success = 1;
+  repeated VectorRow rows = 2;
+}

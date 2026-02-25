@@ -1,0 +1,177 @@
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto"; // leave this as a reminder we still need to fix date time.... 
+
+option go_package = "github.com/mbloomfi-tibco/as-vdb-grpc/go/api/v1/documentstore";
+option java_multiple_files = true;
+option java_package = "com.tibco.asvdb";
+option java_outer_classname = "documentstore";
+
+package documentstore;
+
+service DocumentStore {
+
+  rpc NewDocument (NewDocumentRequest) returns (NewDocumentResponse) {}
+
+  rpc UpdateDocument (UpdateDocumentRequest) returns (UpdateDocumentResponse) {} ;
+
+  rpc GetDocument (GetDocumentRequest) returns (GetDocumentsRespone) {};
+
+  rpc NewDocumentEvent (NewDocumentEventRequest) returns (NewDocumentEventResponse) {};
+
+  rpc GetDocumentEvent (GetDocumentEventRequest) returns (GetDocumentEventResponse) {};
+
+  rpc GetDocumentStoreStats (GetDocumentStoreStatsRequest) returns (GetDocumentStoreStatsResponse) {};
+
+  rpc CreateDocumentStore (CreateDocumentStoreRequest) returns (CreateDocumentStoreResponse) {};
+
+  rpc DeleteDocumentStore (DeleteDocumentStoreRequest) returns (DeleteDocumentStoreResponse) {};
+}
+
+message CreateDocumentStoreRequest {
+    string documentStoreName = 1;
+    optional string description = 2;
+    optional string defaultVectorStore = 3;
+}
+
+message DeleteDocumentStoreRequest {
+    string documentStoreName = 1;
+}
+
+message DeleteDocumentStoreResponse {
+    int32 success = 1;
+    string documentStoreName = 2;
+} 
+
+message CreateDocumentStoreResponse {
+    int32 success = 1;
+    string documentStoreName = 2;
+}
+
+message GetDocumentStoreStatsRequest {
+    repeated string documentStoresName = 1;
+}
+
+message GetDocumentStoreStatsResponse {
+    int32 success = 1;
+    repeated DocumentStoreStats documentStoreStats = 2;
+}
+
+message DocumentStoreStats {
+    string documentStoreName = 1;
+    int64 total = 2;
+    int64 EventCount = 3;
+    int64 totalChunks = 4;
+    int64 averageChunks = 5;
+    int64 maxChunks = 6;
+    int64 minChunks = 7;
+    int64 modeChunks = 8;
+    int64 modeChunkOccurance = 9;
+    repeated DocumentStoreStatus documentStoreStatus = 10;
+    google.protobuf.Timestamp lastUpdated = 11;
+}
+
+message DocumentStoreStatus {
+    string documentStoreState = 1;
+    int64 count = 2;
+}
+
+message NewDocument {
+    string docTitle = 1;
+    optional int64 chunks = 2;
+    optional string VectorStore = 3;
+    optional string metaData = 4;
+}
+
+message UpdateDocument {
+    int64  docID = 1; 
+    optional string docTitle = 2;
+    optional string status = 3;
+    optional int64 chunks = 4;
+    optional string VectorStore = 5;
+    optional string metaData = 6;
+}
+
+message DocumentRow {
+    int64  docID = 1;
+    string docTitle = 2;
+    string status = 3;
+    int64 chunks = 4;
+    string VectorStore = 5;
+    string metaData = 6;
+    google.protobuf.Timestamp lastUpdated = 7;
+}
+
+message NewDocumentRequest {
+  string DocumentStore = 1;
+  repeated NewDocument rows = 2;
+}
+
+message NewDocumentResponse {
+  int32 success = 1;
+  repeated DocumentRow row = 2;
+}
+
+message UpdateDocumentRequest {
+  string DocumentStore = 1;
+  repeated UpdateDocument rows = 2;
+}
+
+message UpdateDocumentResponse {
+  int32 success = 1;
+}
+
+message GetDocumentRequest {
+  string DocumentStore = 1;
+  optional int64  docID = 2;
+  optional string docTitle = 3;
+  optional string status = 4;
+  optional string VectorStore = 5;
+}
+
+message GetDocumentsRespone {
+  int32 success = 1;
+  repeated DocumentRow row = 2;
+}
+
+message NewDocumentEvent {
+  int64 docID = 1;
+  string event = 2;
+  string notes = 3;
+}
+
+message DocumentEvent {
+  int64 eventID = 1;
+  int64 docID = 2;
+  string event = 3;
+  string notes = 4;
+  google.protobuf.Timestamp lastUpdated = 5;
+}
+
+message GetDocumentEvent {
+  string DocumentStore = 1;
+  optional int64 eventID = 2;
+  optional int64 docID = 3;
+  optional string event = 4;
+}
+
+message NewDocumentEventRequest {
+  string DocumentStore = 1;
+  repeated NewDocumentEvent rows = 2;
+}
+
+message NewDocumentEventResponse {
+  int32 success = 1;
+  repeated DocumentEvent rows = 2;
+}
+
+message GetDocumentEventRequest{
+  string DocumentStore = 1;
+  GetDocumentEvent searchCriteria = 2;
+}
+
+message GetDocumentEventResponse {
+  int32 success = 1;
+  repeated DocumentEvent rows = 2;
+}
