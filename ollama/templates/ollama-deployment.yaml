@@ -1,0 +1,137 @@
+{{- if .Values.ollama.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ai-workshop.fullname" . }}-ollama
+  labels:
+    {{- include "ai-workshop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama-server
+  {{- with .Values.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "ai-workshop.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ollama-server
+  template:
+    metadata:
+      labels:
+        {{- include "ai-workshop.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: ollama-server
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+      # Init container to pull models on startup
+      - name: pull-models
+        image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+        imagePullPolicy: {{ .Values.ollama.image.pullPolicy }}
+        command:
+        - /bin/sh
+        - -c
+        - |
+          # Start Ollama in background
+          ollama serve &
+          OLLAMA_PID=$!
+          
+          # Wait for Ollama to be ready
+          echo "Waiting for Ollama to start..."
+          until ollama list > /dev/null 2>&1; do
+            sleep 2
+          done
+          
+          echo "Ollama is ready, pulling models..."
+          
+          {{- range .Values.ollama.models.chat }}
+          echo "Pulling chat model: {{ . }}"
+          ollama pull {{ . }} || echo "Failed to pull {{ . }}, continuing..."
+          {{- end }}
+          
+          {{- range .Values.ollama.models.embedding }}
+          echo "Pulling embedding model: {{ . }}"
+          ollama pull {{ . }} || echo "Failed to pull {{ . }}, continuing..."
+          {{- end }}
+          
+          echo "Model pulling complete"
+          
+          # Stop background Ollama
+          kill $OLLAMA_PID
+          wait $OLLAMA_PID 2>/dev/null || true
+        {{- if .Values.storage.ollama.enabled }}
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+        {{- end }}
+        {{- if .Values.ollama.resources }}
+        resources:
+          {{- toYaml .Values.ollama.resources | nindent 10 }}
+        {{- end }}
+      containers:
+      - name: ollama
+        image: "{{ .Values.ollama.image.repository }}:{{ .Values.ollama.image.tag }}"
+        imagePullPolicy: {{ .Values.ollama.image.pullPolicy }}
+        command: ["ollama"]
+        args: ["serve"]
+        ports:
+        - name: http
+          containerPort: {{ .Values.ollama.port }}
+          protocol: TCP
+        {{- if .Values.env }}
+        env:
+          {{- toYaml .Values.env | nindent 10 }}
+        {{- end }}
+        {{- if .Values.ollama.readinessProbe }}
+        readinessProbe:
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: {{ .Values.ollama.readinessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.ollama.readinessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.ollama.readinessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.ollama.livenessProbe }}
+        livenessProbe:
+          httpGet:
+            path: /api/tags
+            port: http
+          initialDelaySeconds: {{ .Values.ollama.livenessProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.ollama.livenessProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.ollama.livenessProbe.timeoutSeconds }}
+        {{- end }}
+        {{- if .Values.storage.ollama.enabled }}
+        volumeMounts:
+        - name: ollama-data
+          mountPath: /root/.ollama
+        {{- end }}
+        {{- if .Values.ollama.resources }}
+        resources:
+          {{- toYaml .Values.ollama.resources | nindent 10 }}
+        {{- end }}
+      {{- if .Values.storage.ollama.enabled }}
+      volumes:
+      - name: ollama-data
+        {{- if .Values.storage.ollama.ephemeral }}
+        emptyDir: {}
+        {{- else if .Values.storage.ollama.persistentVolume.enabled }}
+        persistentVolumeClaim:
+          claimName: {{ include "ai-workshop.fullname" . }}-ollama-pvc
+        {{- end }}
+      {{- end }}
+{{- end }}

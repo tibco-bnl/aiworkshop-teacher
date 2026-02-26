@@ -1,0 +1,104 @@
+# Values for CPU-only deployment with Ollama
+# Platform: Generic CPU (no GPU required)
+# Environment: Kubernetes
+# No GPU dependencies - pure CPU inference
+
+# Single replica for deployment
+replicaCount: 1
+
+# Ollama image configuration
+ollama:
+  enabled: true
+  image:
+    repository: ollama/ollama
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  
+  # Models to pre-load (pulled on first startup)
+  models:
+    chat:
+      - "llama3.2:3b"          # Lightweight chat model (2GB)
+    embedding:
+      - "nomic-embed-text"     # Nomic embedding model for RAG (274MB)
+  
+  # Service port
+  port: 11434
+  
+  # Resource limits (CPU-only)
+  resources:
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  
+  # Readiness probe
+  readinessProbe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+  
+  # Liveness probe
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    timeoutSeconds: 10
+
+# Disable vLLM chat model (requires GPU)
+chatModel:
+  enabled: false
+
+# Disable vLLM embedding model (requires GPU)
+embeddingModel:
+  enabled: false
+
+# No GPU-specific node scheduling
+nodeSelector: null
+
+# No tolerations needed for CPU deployment
+tolerations: []
+
+# No affinity needed for CPU deployment
+affinity: null
+
+# Service configuration
+service:
+  type: ClusterIP
+  ollama:
+    port: 80
+    targetPort: 11434
+
+# Storage for Ollama models
+storage:
+  ollama:
+    enabled: true
+    # Use ephemeral storage (models downloaded on first start)
+    ephemeral: true
+    # For persistent storage, set ephemeral: false and configure PVC
+    persistentVolume:
+      enabled: false
+      size: 10Gi
+      storageClass: "default"
+      mountPath: "/root/.ollama"
+
+# Environment variables for Ollama
+env:
+  # Ollama configuration
+  - name: OLLAMA_HOST
+    value: "0.0.0.0:11434"
+  - name: OLLAMA_ORIGINS
+    value: "*"
+  # CPU-only mode (no GPU)
+  - name: OLLAMA_NUM_GPU
+    value: "0"
+
+# Labels
+labels:
+  app: ai-inference
+  deployment: cpu-ollama
+
+# Pod annotations
+podAnnotations:
+  deployment: "cpu-ollama"
+  gpu-required: "false"

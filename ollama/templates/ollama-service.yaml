@@ -1,0 +1,22 @@
+{{- if .Values.ollama.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ai-workshop.fullname" . }}-ollama
+  labels:
+    {{- include "ai-workshop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama-server
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - port: {{ .Values.service.ollama.port }}
+    targetPort: {{ .Values.service.ollama.targetPort }}
+    protocol: TCP
+    name: http
+    {{- if and (eq .Values.service.type "NodePort") .Values.service.ollama.nodePort }}
+    nodePort: {{ .Values.service.ollama.nodePort }}
+    {{- end }}
+  selector:
+    {{- include "ai-workshop.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama-server
+{{- end }}
