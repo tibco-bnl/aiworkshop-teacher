@@ -263,7 +263,8 @@
               "ref": "#subflow",
               "settings": {
                 "flowURI": "res://flow:IterateOverChunks",
-                "detached": false
+                "detached": false,
+                "execTimeout": 0
               },
               "input": {
                 "filename": "=$iteration[value].filename",
@@ -305,7 +306,7 @@
             }
           }
         ],
-        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjAsInkiOjg5fSwiQ2h1bmthdGV4dCI6eyJ4IjoxODksInkiOjgwfSwiUGFyc2VKU09OIjp7IngiOjM4NSwieSI6ODV9LCJMb2dNZXNzYWdlMSI6eyJ4Ijo2MTUsInkiOjgzfSwiUmVhZEZpbGUiOnsieCI6ODAzLCJ5Ijo4MH0sIkxvZ01lc3NhZ2UiOnsieCI6NTcsInkiOjI1Nn0sIkRvY3VtZW50RGV0YWlscyI6eyJ4IjozMzQsInkiOjI1OX0sIlN0YXJ0YVN1YkZsb3ciOnsieCI6NjM1LCJ5IjoyNTh9LCJSZXR1cm4iOnsieCI6ODExLCJ5IjoyNjJ9fQ==",
+        "fe_metadata": "eyJTdGFydEFjdGl2aXR5Ijp7IngiOjAsInkiOjg5fSwiQ2h1bmthdGV4dCI6eyJ4IjoxODksInkiOjc5fSwiUGFyc2VKU09OIjp7IngiOjM4NSwieSI6ODV9LCJMb2dNZXNzYWdlMSI6eyJ4Ijo2MTUsInkiOjgyfSwiUmVhZEZpbGUiOnsieCI6ODAzLCJ5Ijo4MH0sIkxvZ01lc3NhZ2UiOnsieCI6NTcsInkiOjI1Nn0sIkRvY3VtZW50RGV0YWlscyI6eyJ4IjozMzQsInkiOjI1OX0sIlN0YXJ0YVN1YkZsb3ciOnsieCI6NjM1LCJ5IjoyNTh9LCJSZXR1cm4iOnsieCI6ODExLCJ5IjoyNjJ9fQ==",
         "metadata": {
           "input": [
             {
@@ -385,7 +386,8 @@
               "ref": "#subflow",
               "settings": {
                 "flowURI": "res://flow:CreateEmbeddingAndStore",
-                "detached": false
+                "detached": false,
+                "execTimeout": 0
               },
               "input": {
                 "docID": "=$flow.documentID",
@@ -588,7 +590,8 @@
               "ref": "#subflow",
               "settings": {
                 "flowURI": "res://flow:Chunkfile",
-                "detached": false
+                "detached": false,
+                "execTimeout": 0
               },
               "input": {
                 "filename": "=$iteration[value].name"
@@ -902,9 +905,9 @@
     }
   },
   "connections": {},
-  "contrib": "W3sicmVmIjoiZ2l0bGFiLmNvbS9qdXJyaWFhbmJyYW5kc21hZmxvZ29leHRlbnNpb25zL2luZ2VzdGlvbiIsImlkIjoiaW5nZXN0aW9uIiwidmVyc2lvbiI6IjEuMC4wIiwidGFnIjoiMS4wLjAiLCJuYW1lIjoiVElCQ08gRmxvZ28gaW5nZXN0aW9uIENvbm5lY3RvciIsInMzbG9jYXRpb24iOiJ7VVNFUklEfS9pbmdlc3Rpb24iLCJpc1VzZXJFeHRlbnNpb24iOnRydWV9LHsicmVmIjoiZ2l0aHViLmNvbS90aWJjby9mbG9nby1nZW5lcmFsL3NyYy9hcHAvR2VuZXJhbCIsImlkIjoiR2VuZXJhbCIsInZlcnNpb24iOiIxLjYuOSIsInRhZyI6IjEuNi45LWIwNCIsIm5hbWUiOiJHZW5lcmFsIiwiczNsb2NhdGlvbiI6IlRpYmNvL0dlbmVyYWwiLCJpc1VzZXJFeHRlbnNpb24iOmZhbHNlfSx7InJlZiI6ImdpdGh1Yi5jb20vdGliY28vZmxvZ28tZmlsZXMvc3JjL2FwcC9GaWxlIiwiaWQiOiJGaWxlIiwidmVyc2lvbiI6IjEuMC4wIiwidGFnIjoiMS4wLjAtYjE0IiwibmFtZSI6IkZpbGUiLCJzM2xvY2F0aW9uIjoiVGliY28vRmlsZSIsImlzVXNlckV4dGVuc2lvbiI6ZmFsc2V9LHsicmVmIjoiZ2l0aHViLmNvbS9tYmxvb21maS10aWJjby9leHRlbnNpb25zL2FzVmVjdG9yREIiLCJpZCI6ImFzVmVjdG9yREIiLCJ2ZXJzaW9uIjoiMS4wLjAiLCJ0YWciOiIxLjAuMCIsIm5hbWUiOiJBY3RpdmVTcGFjZXMgREIiLCJzM2xvY2F0aW9uIjoie1VTRVJJRH0vYXNWZWN0b3JEQiIsImlzVXNlckV4dGVuc2lvbiI6dHJ1ZX1d",
+  "contrib": "W3sicmVmIjoiZ2l0bGFiLmNvbS9qdXJyaWFhbmJyYW5kc21hZmxvZ29leHRlbnNpb25zL2luZ2VzdGlvbiIsInZlcnNpb24iOiIxLjAuMCIsInRhZyI6IjEuMC4wIiwibmFtZSI6IkNodW5rYXRleHQiLCJpZCI6ImluZ2VzdGlvbiIsInMzbG9jYXRpb24iOiJ7VVNFUklEfS9pbmdlc3Rpb24iLCJpc1VzZXJFeHRlbnNpb24iOnRydWV9LHsicmVmIjoiZ2l0aHViLmNvbS90aWJjby9mbG9nby1nZW5lcmFsL3NyYy9hcHAvR2VuZXJhbCIsImlkIjoiR2VuZXJhbCIsInZlcnNpb24iOiIxLjYuMTEiLCJ0YWciOiIxLjYuMTEtYjAyIiwibmFtZSI6IkdlbmVyYWwiLCJzM2xvY2F0aW9uIjoiVGliY28vR2VuZXJhbCIsImlzVXNlckV4dGVuc2lvbiI6ZmFsc2V9LHsicmVmIjoiZ2l0aHViLmNvbS90aWJjby9mbG9nby1maWxlcy9zcmMvYXBwL0ZpbGUiLCJpZCI6IkZpbGUiLCJ2ZXJzaW9uIjoiMS4wLjAiLCJ0YWciOiIxLjAuMC1iMTQiLCJuYW1lIjoiRmlsZSIsInMzbG9jYXRpb24iOiJUaWJjby9GaWxlIiwiaXNVc2VyRXh0ZW5zaW9uIjpmYWxzZX0seyJyZWYiOiJnaXRodWIuY29tL21ibG9vbWZpLXRpYmNvL2V4dGVuc2lvbnMvYXNWZWN0b3JEQiIsImlkIjoiYXNWZWN0b3JEQiIsInZlcnNpb24iOiIxLjAuMCIsInRhZyI6IjEuMC4wIiwibmFtZSI6IkFjdGl2ZVNwYWNlcyBEQiIsInMzbG9jYXRpb24iOiJ7VVNFUklEfS9hc1ZlY3RvckRCIiwiaXNVc2VyRXh0ZW5zaW9uIjp0cnVlfV0=",
   "metadata": {
     "endpoints": [],
-    "flogoVersion": "2.25.9"
+    "flogoVersion": "2.26.0"
   }
 }
