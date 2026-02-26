@@ -1,0 +1,44 @@
+replicaCount: 1
+namespace: ai
+
+image:
+  repository: quay.io/docling-project/docling-serve
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+dockling:
+  fullname: "docling-serve"
+  model: "mistral-7b-instruct-v0.1.Q4_0.gguf" 
+
+service:
+  type: ClusterIP
+  port: 5001
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts:
+    - host: ai-docling.dp1.atsnl-emea.azure.dataplanes.pro
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: docling-tls
+  #    hosts:
+  #      - docling.local
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: "azure-files-sc" # Fill this if you have a specific class (e.g., 'standard' or 'gp2')
+
+resources:
+  limits:
+    cpu: "4"
+    memory: 8Gi
+  requests:
+    cpu: "2"
+    memory: 4Gi

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.dockling.fullname }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: docling
+  template:
+    metadata:
+      labels:
+        app: docling
+    spec:
+      containers:
+        - name: docling-serve
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 5001
+          env:
+            - name: HF_HOME
+              value: "/mnt/models"
+          volumeMounts:
+            - name: model-storage
+              mountPath: "/mnt/models"
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: model-storage
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.dockling.fullname }}-models
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
