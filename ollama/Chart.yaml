@@ -1,0 +1,19 @@
+apiVersion: v2
+name: ai-workshop-ollama
+description: A Helm chart for Ollama CPU-only LLM deployment on Kubernetes
+type: application
+version: 1.0.0
+appVersion: "1.0"
+keywords:
+  - ai
+  - llm
+  - cpu
+  - ollama
+  - inference
+  - kubernetes
+  - embeddings
+  - rag
+  - cpu-only
+maintainers:
+  - name: AI Workshop Team
+home: https://github.com/KulbhushanBhalerao/ai-llm-rag-k8s

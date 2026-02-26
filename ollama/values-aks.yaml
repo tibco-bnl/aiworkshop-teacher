@@ -1,0 +1,109 @@
+# AKS-specific values for Ollama CPU-only deployment
+# Cluster: dp1-aks-aauk-kul
+# Resource Group: kul-atsbnl
+# Region: Australia East
+# Platform: CPU-only (no GPU required)
+
+# Override replica count for cost optimization
+# Set to 0 when not in use to stop billing
+replicaCount: 0
+
+# Ollama image configuration
+ollama:
+  enabled: true
+  image:
+    repository: ollama/ollama
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  
+  # Models to pre-load (pulled on first startup)
+  models:
+    chat:
+      - "llama3.2:3b"          # Lightweight chat model (2GB)
+    embedding:
+      - "nomic-embed-text"     # Nomic embedding model for RAG (274MB)
+  
+  # Service port
+  port: 11434
+  
+  # Resource limits (CPU-only) - adjusted for AKS
+  resources:
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  
+  # Readiness probe - allow time for model download
+  readinessProbe:
+    initialDelaySeconds: 60    # Models download on first start
+    periodSeconds: 10
+    timeoutSeconds: 5
+  
+  # Liveness probe
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    timeoutSeconds: 10
+
+# Disable vLLM chat model (requires GPU)
+chatModel:
+  enabled: false
+
+# Disable vLLM embedding model (requires GPU)
+embeddingModel:
+  enabled: false
+
+# No GPU-specific node scheduling required
+nodeSelector: {}
+
+# No tolerations needed for CPU deployment
+tolerations: []
+
+# No affinity needed for CPU deployment
+affinity: null
+
+# Service configuration for workshop access
+service:
+  type: ClusterIP
+  ollama:
+    port: 80
+    targetPort: 11434
+
+# Storage: Use ephemeral for auto-scaling (models re-download on pod start)
+# For persistent storage, change ephemeral to false and enable PVC
+storage:
+  ollama:
+    enabled: true
+    ephemeral: true
+    persistentVolume:
+      enabled: false
+      size: 10Gi
+      storageClass: "managed-premium"
+      mountPath: "/root/.ollama"
+
+# Environment variables for Ollama
+env:
+  # Ollama configuration
+  - name: OLLAMA_HOST
+    value: "0.0.0.0:11434"
+  - name: OLLAMA_ORIGINS
+    value: "*"
+  # CPU-only mode (no GPU)
+  - name: OLLAMA_NUM_GPU
+    value: "0"
+
+# Pod annotations for monitoring
+podAnnotations:
+  workshop: "ai-llm-rag"
+  cost-center: "workshop"
+  deployment: "cpu-ollama"
+  gpu-required: "false"
+
+# Labels for organization
+labels:
+  app: ai-inference
+  environment: workshop
+  deployment: cpu-ollama
+  cluster: dp1-aks-aauk-kul
