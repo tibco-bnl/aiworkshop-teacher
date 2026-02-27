@@ -90,7 +90,8 @@ You can connect to ActiveSpaces using DBeaver or any JDBC client to inspect and 
    - Add libraries from ActiveSpaces installation:
      - **bin folder**: `tibdgjni.dll` (Windows) or equivalent for your OS
      - **lib folder**: `tibdg.jar`
-   - See [JDBC Client Libraries Configuration](images/as-jdbc-client-libraries-config.png)
+   
+   ![JDBC Client Libraries Configuration](images/as-jdbc-client-libraries-config.png)
 
 3. **Connection URL:**
    ```
@@ -98,8 +99,9 @@ You can connect to ActiveSpaces using DBeaver or any JDBC client to inspect and 
    ```
    For remote connections, replace `localhost:3031` with your ActiveSpaces endpoint.
 
-4. **Configure Connection:**
-   - See [JDBC Client Settings Configuration](images/as-jdbc-client-settings-config.png)
+4. **Configure Connection Settings:**
+   
+   ![JDBC Client Settings Configuration](images/as-jdbc-client-settings-config.png)
 
 Once connected, you can browse tables, run SQL queries, and inspect the stored documents and vectors.
 
