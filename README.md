@@ -2,7 +2,7 @@
 
 Quick deployment guide for setting up the AI Workshop Kubernetes environment.
 
-📦 **[View Releases](releases/)** | Current Version: [v1.0.0](releases/v1.0.0.md)
+📦 **[View Releases](https://github.com/tibco-bnl/aiworkshop-teacher/releases)** | Current Version: [v1.0.0](https://github.com/tibco-bnl/aiworkshop-teacher/releases/tag/v1.0.0) | [Release Notes](releases/v1.0.0.md)
 
 ## Architecture Overview
 
