@@ -78,6 +78,31 @@ kubectl get ingress -n ai
 kubectl get svc -n ai
 ```
 
+## Connecting to ActiveSpaces with JDBC
+
+You can connect to ActiveSpaces using DBeaver or any JDBC client to inspect and query the document and vector stores.
+
+### DBeaver Configuration
+
+1. **Install ActiveSpaces 5.x** on your local machine
+
+2. **Configure Database Driver:**
+   - Add libraries from ActiveSpaces installation:
+     - **bin folder**: `tibdgjni.dll` (Windows) or equivalent for your OS
+     - **lib folder**: `tibdg.jar`
+   - See [JDBC Client Libraries Configuration](images/as-jdbc-client-libraries-config.png)
+
+3. **Connection URL:**
+   ```
+   jdbc:tibco:tibdg:_default;realmurl=http://localhost:3031
+   ```
+   For remote connections, replace `localhost:3031` with your ActiveSpaces endpoint.
+
+4. **Configure Connection:**
+   - See [JDBC Client Settings Configuration](images/as-jdbc-client-settings-config.png)
+
+Once connected, you can browse tables, run SQL queries, and inspect the stored documents and vectors.
+
 ## Running the Workshop Ingestion
 
 Once all services are deployed, you can run the Flogo ingestion flow:
