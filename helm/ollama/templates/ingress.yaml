@@ -15,6 +15,9 @@ metadata:
     {{- else }}
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     {{- end }}
+    {{- if .Values.ingress.whitelistSourceRanges }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- end }}
     {{- if .Values.ingress.annotations }}
     {{- toYaml .Values.ingress.annotations | nindent 4 }}
     {{- end }}
