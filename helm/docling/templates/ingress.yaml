@@ -4,9 +4,17 @@ kind: Ingress
 metadata:
   name: {{ .Values.dockling.fullname }}
   namespace: {{ .Values.namespace }}
-  {{- with .Values.ingress.annotations }}
+  {{- $annotations := dict }}
+  {{- if .Values.ingress.annotations }}
+    {{- $annotations = .Values.ingress.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.whitelistSourceRanges }}
+    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+  {{- end }}
+  {{- if $annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml $annotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.ingress.className }}

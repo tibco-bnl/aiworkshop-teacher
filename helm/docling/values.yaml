@@ -17,6 +17,15 @@ service:
 ingress:
   enabled: true
   className: "nginx"
+  # IP whitelist configuration
+  whitelistSourceRanges:
+    - 63.34.112.27/32
+    - 18.200.217.204/32
+    - 108.129.54.220/32
+    - 62.250.248.64/32
+    - 217.120.32.76/32
+    - 86.90.167.198/32
+    - 86.95.114.49/32
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     # nginx.ingress.kubernetes.io/ssl-redirect: "false"
