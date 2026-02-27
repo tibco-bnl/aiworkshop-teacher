@@ -6,6 +6,9 @@
 # Single replica for deployment
 replicaCount: 1
 
+# Namespace configuration
+namespace: default
+
 # Ollama image configuration
 ollama:
   enabled: true
@@ -68,6 +71,18 @@ service:
   ollama:
     port: 80
     targetPort: 11434
+
+# Ingress configuration
+ingress:
+  enabled: false
+  host: ollama.local
+  ssl:
+    enabled: false
+    clusterIssuer: letsencrypt-prod
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
 
 # Storage for Ollama models
 storage:

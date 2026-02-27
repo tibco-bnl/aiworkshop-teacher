@@ -1,0 +1,259 @@
+# Global configuration
+global:
+ 
+  # Target namespace for deployment
+  namespace: ai
+  
+  # Create namespace if it doesn't exist
+  createNamespace: true
+
+  # Image registry configuration
+  imageRegistry: ghcr.io/mbloomfi-tibco
+
+  # Version tags
+  asVersion: "5.0.0"
+  grpcServicesVersion: "0.0.5"
+
+# Core DNS name for ingress hosts
+coreDnsName: "example.com"
+
+# FTL Server configuration
+ftlserver:
+  enabled: true
+  image:
+    repository: as-tibftlserver
+    tag: ""  # Uses global.asVersion if empty
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 13031
+    targetPort: 13031
+  
+  # Command arguments
+  command:
+    configPath: /config/ftl-dev.yaml
+    name: ftl0
+    licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # Set your license server URL
+   
+  
+  # Config and license files
+  config:
+    # Config file path (relative to chart directory)
+    ftlDevYaml: "files/config/ftl-dev.yaml"
+    
+    # License key file path (relative to chart directory)
+    licenseKeyFile: "files/license_key/AS-VECTORDB_ANY.bin"
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 4Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
+
+# Vector Store service configuration
+vectorstore:
+  enabled: true
+  image:
+    repository: tib-as-vectorstore
+    tag: ""  # Uses global.grpcServicesVersion if empty
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 50051
+    targetPort: 50051
+  
+  environment:
+    asConnUrl: "http://as-vdb-grpc-ftlserver:13031"
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# Document Store service configuration
+documentstore:
+  enabled: true
+  image:
+    repository: tib-as-documentstore
+    tag: ""  # Uses global.grpcServicesVersion if empty
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 50052
+    targetPort: 50052
+  
+  environment:
+    asConnUrl: "http://as-vdb-grpc-ftlserver:13031"
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# Config service configuration
+config:
+  enabled: true
+  image:
+    repository: as-tibdg
+    tag: ""  # Uses global.asVersion if empty
+    pullPolicy: IfNotPresent
+  
+  # Command arguments
+  command:
+    waitForRealm: 60
+    configPath: /config/conf-dev.tibdg
+  
+  # Config file path (relative to chart directory)
+  tibdgConfig: "files/config/conf-dev.tibdg"
+  
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# TIBDG Proxy configuration
+tibdgproxy:
+  enabled: true
+  replicas: 1
+  image:
+    repository: as-tibdgproxy
+    tag: ""  # Uses global.asVersion if empty
+    pullPolicy: IfNotPresent
+  
+  # Command arguments
+  command:
+    name: p_00
+  
+  resources:
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+# TIBDG Node configuration
+tibdgnode:
+  enabled: true
+  replicas: 1
+  image:
+    repository: as-tibdgnode
+    tag: ""  # Uses global.asVersion if empty
+    pullPolicy: IfNotPresent
+  
+  # Command arguments
+  command:
+    name: cs_01.n_1
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# Persistent Volume configuration
+persistence:
+  enabled: true
+  storageClass: ""  # Use default storage class if empty
+  accessMode: ReadWriteMany
+  size: 10Gi
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  # imagePullSecrets is a list of image pull secrets to be used by the service account
+  # Example:
+  # imagePullSecrets:
+  #   - name: myregistrykey
+  #   - name: anotherregistrykey
+  imagePullSecrets:
+    - name: ghcr-login-secret
+ 
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 2000
+
+# Security Context
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Ingress configuration
+ingress:
+  enabled: false
+  className: "nginx"  # Ingress class name (e.g., "nginx", "traefik")
+  createMiddleware: false  # Set to true only if Traefik CRDs are installed
+  annotations: {}
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"  # For gRPC services
+  
+  # IP whitelist configuration
+  whitelistSourceRanges: []
+    # - "62.250.248.64/32"
+    # - "62.250.248.65/32"
+  
+  # FTL Server ingress
+  ftlserver:
+    enabled: true
+    host: ftlserver
+    path: /
+    pathType: Prefix
+    tls:
+      enabled: false
+      secretName: ftlserver-tls
+  
+  # Vector Store ingress (gRPC)
+  vectorstore:
+    enabled: true
+    host: vectorstore
+    path: /
+    pathType: Prefix
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    tls:
+      enabled: false
+      secretName: vectorstore-tls
+  
+  # Document Store ingress (gRPC)
+  documentstore:
+    enabled: true
+    host: documentstore
+    path: /
+    pathType: Prefix
+    annotations:
+      nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    tls:
+      enabled: false
+      secretName: documentstore-tls

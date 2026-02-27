@@ -2,7 +2,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ai-workshop.fullname" . }}-ollama
+  name: {{ include "ai-workshop.fullname" . }}
+  namespace: {{ .Values.namespace | default "default" }}
   labels:
     {{- include "ai-workshop.labels" . | nindent 4 }}
     app.kubernetes.io/component: ollama-server
@@ -131,7 +132,7 @@ spec:
         emptyDir: {}
         {{- else if .Values.storage.ollama.persistentVolume.enabled }}
         persistentVolumeClaim:
-          claimName: {{ include "ai-workshop.fullname" . }}-ollama-pvc
+          claimName: {{ include "ai-workshop.fullname" . }}
         {{- end }}
       {{- end }}
 {{- end }}

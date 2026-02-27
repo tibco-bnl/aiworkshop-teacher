@@ -1,0 +1,11 @@
+{{- if and .Values.global.createNamespace .Values.global.namespace }}
+{{- if ne (include "as-vdb-grpc.namespace" .) .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: namespace
+{{- end }}
+{{- end }}
