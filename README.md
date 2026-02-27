@@ -2,6 +2,8 @@
 
 Quick deployment guide for setting up the AI Workshop Kubernetes environment.
 
+📦 **[View Releases](releases/)** | Current Version: [v1.0.0](releases/v1.0.0.md)
+
 ## Architecture Overview
 
 The workshop environment consists of:
