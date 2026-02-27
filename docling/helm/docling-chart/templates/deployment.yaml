@@ -7,11 +7,11 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: docling
+      app: {{ .Values.dockling.fullname }}
   template:
     metadata:
       labels:
-        app: docling
+        app: {{ .Values.dockling.fullname }}
     spec:
       containers:
         - name: docling-serve
