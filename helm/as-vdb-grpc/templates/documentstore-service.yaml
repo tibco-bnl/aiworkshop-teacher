@@ -1,0 +1,20 @@
+{{- if .Values.documentstore.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-documentstore
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: documentstore
+spec:
+  type: {{ .Values.documentstore.service.type }}
+  ports:
+    - port: {{ .Values.documentstore.service.port }}
+      targetPort: {{ .Values.documentstore.service.targetPort }}
+      protocol: TCP
+      name: grpc
+  selector:
+    {{- include "as-vdb-grpc.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: documentstore
+{{- end }}
