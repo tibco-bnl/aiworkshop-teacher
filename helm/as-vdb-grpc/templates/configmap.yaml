@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-config
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+data:
+  {{- if .Values.ftlserver.config.ftlDevYaml }}
+  ftl-dev.yaml: |
+    {{- .Files.Get .Values.ftlserver.config.ftlDevYaml | nindent 4 }}
+  {{- end }}
+  {{- if .Values.ftlserver.config.ftlUsersConf }}
+  ftlusers.conf: |
+    {{- .Files.Get .Values.ftlserver.config.ftlUsersConf | nindent 4 }}
+  {{- end }}
+  {{- if .Values.config.tibdgConfig }}
+  conf-dev.tibdg: |
+    {{- .Files.Get .Values.config.tibdgConfig | nindent 4 }}
+  {{- end }}

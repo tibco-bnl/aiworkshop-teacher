@@ -1,0 +1,97 @@
+1. Get the application URLs by running these commands:
+
+{{- if .Values.ingress.enabled }}
+{{- if and .Values.ingress.ftlserver.enabled .Values.ftlserver.enabled }}
+   FTL Server (via Ingress):
+   echo "FTL Server available at http://{{ printf "%s.%s" .Values.ingress.ftlserver.host .Values.coreDnsName }}{{ .Values.ingress.ftlserver.path }}"
+{{- end }}
+{{- if and .Values.ingress.vectorstore.enabled .Values.vectorstore.enabled }}
+   VectorStore gRPC service (via Ingress):
+   echo "VectorStore available at http://{{ printf "%s.%s" .Values.ingress.vectorstore.host .Values.coreDnsName }}{{ .Values.ingress.vectorstore.path }}"
+{{- end }}
+{{- if and .Values.ingress.documentstore.enabled .Values.documentstore.enabled }}
+   DocumentStore gRPC service (via Ingress):
+   echo "DocumentStore available at http://{{ printf "%s.%s" .Values.ingress.documentstore.host .Values.coreDnsName }}{{ .Values.ingress.documentstore.path }}"
+{{- end }}
+{{- else }}
+{{- if .Values.ftlserver.enabled }}
+   FTL Server:
+{{- if eq .Values.ftlserver.service.type "NodePort" }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "as-vdb-grpc.fullname" . }}-ftlserver)
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "FTL Server available at $NODE_IP:$NODE_PORT"
+{{- else if eq .Values.ftlserver.service.type "LoadBalancer" }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "as-vdb-grpc.fullname" . }}-ftlserver'
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "as-vdb-grpc.fullname" . }}-ftlserver --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo "FTL Server available at $SERVICE_IP:{{ .Values.ftlserver.service.port }}"
+{{- else if eq .Values.ftlserver.service.type "ClusterIP" }}
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "as-vdb-grpc.fullname" . }}-ftlserver {{ .Values.ftlserver.service.port }}:{{ .Values.ftlserver.service.port }}
+   echo "FTL Server available at 127.0.0.1:{{ .Values.ftlserver.service.port }}"
+{{- end }}
+{{- end }}
+
+{{- if .Values.vectorstore.enabled }}
+   VectorStore gRPC service:
+{{- if eq .Values.vectorstore.service.type "NodePort" }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "as-vdb-grpc.fullname" . }}-vectorstore)
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "VectorStore available at $NODE_IP:$NODE_PORT"
+{{- else if eq .Values.vectorstore.service.type "LoadBalancer" }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "as-vdb-grpc.fullname" . }}-vectorstore'
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "as-vdb-grpc.fullname" . }}-vectorstore --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo "VectorStore available at $SERVICE_IP:{{ .Values.vectorstore.service.port }}"
+{{- else if eq .Values.vectorstore.service.type "ClusterIP" }}
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "as-vdb-grpc.fullname" . }}-vectorstore {{ .Values.vectorstore.service.port }}:{{ .Values.vectorstore.service.port }}
+   echo "VectorStore available at 127.0.0.1:{{ .Values.vectorstore.service.port }}"
+{{- end }}
+{{- end }}
+
+{{- if .Values.documentstore.enabled }}
+   DocumentStore gRPC service:
+{{- if eq .Values.documentstore.service.type "NodePort" }}
+   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "as-vdb-grpc.fullname" . }}-documentstore)
+   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+   echo "DocumentStore available at $NODE_IP:$NODE_PORT"
+{{- else if eq .Values.documentstore.service.type "LoadBalancer" }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "as-vdb-grpc.fullname" . }}-documentstore'
+   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "as-vdb-grpc.fullname" . }}-documentstore --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+   echo "DocumentStore available at $SERVICE_IP:{{ .Values.documentstore.service.port }}"
+{{- else if eq .Values.documentstore.service.type "ClusterIP" }}
+   kubectl port-forward --namespace {{ .Release.Namespace }} svc/{{ include "as-vdb-grpc.fullname" . }}-documentstore {{ .Values.documentstore.service.port }}:{{ .Values.documentstore.service.port }}
+   echo "DocumentStore available at 127.0.0.1:{{ .Values.documentstore.service.port }}"
+{{- end }}
+{{- end }}
+{{- end }}
+
+2. Check the status of your deployment:
+   kubectl get pods --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+3. View logs:
+   # All services
+   kubectl logs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/instance={{ .Release.Name }}
+   
+   # Specific services
+   kubectl logs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/component=ftlserver
+   kubectl logs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/component=vectorstore  
+   kubectl logs --namespace {{ .Release.Namespace }} -l app.kubernetes.io/component=documentstore
+
+4. To scale the TIBDG components:
+   kubectl scale deployment {{ include "as-vdb-grpc.fullname" . }}-tibdgproxy --namespace {{ .Release.Namespace }} --replicas=2
+   kubectl scale deployment {{ include "as-vdb-grpc.fullname" . }}-tibdgnode --namespace {{ .Release.Namespace }} --replicas=3
+
+{{- if not .Values.ftlserver.command.licenseServerUrl }}
+WARNING: No license server URL configured. Please set ftlserver.command.licenseServerUrl or provide a license key.
+{{- end }}
+
+{{- if not .Values.ftlserver.config.ftlDevYaml }}
+WARNING: No FTL configuration provided. Please set ftlserver.config.ftlDevYaml with your FTL configuration.
+{{- end }}
+
+{{- if not .Values.config.tibdgConfig }}
+WARNING: No TIBDG configuration provided. Please set config.tibdgConfig with your metaspace and table definitions.
+{{- end }}
+
+5. For troubleshooting, check the README.md file in the chart directory for common issues and solutions.

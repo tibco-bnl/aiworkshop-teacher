@@ -1,0 +1,49 @@
+{{- if and .Values.ingress.enabled .Values.ingress.ftlserver.enabled .Values.ftlserver.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-ftlserver
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ftlserver-ingress
+  {{- $annotations := dict }}
+  {{- if .Values.ingress.annotations }}
+    {{- $annotations = .Values.ingress.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.ftlserver.annotations }}
+    {{- $annotations = merge $annotations .Values.ingress.ftlserver.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.className }}
+    {{- $annotations = merge $annotations (dict "kubernetes.io/ingress.class" .Values.ingress.className) }}
+  {{- end }}
+  {{- if .Values.ingress.whitelistSourceRanges }}
+    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+  {{- end }}
+  {{- if $annotations }}
+  annotations:
+    {{- toYaml $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.ftlserver.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ printf "%s.%s" .Values.ingress.ftlserver.host .Values.coreDnsName | quote }}
+      secretName: {{ .Values.ingress.ftlserver.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.ingress.ftlserver.host .Values.coreDnsName | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.ftlserver.path }}
+            pathType: {{ .Values.ingress.ftlserver.pathType }}
+            backend:
+              service:
+                name: {{ include "as-vdb-grpc.fullname" . }}-ftlserver
+                port:
+                  number: {{ .Values.ftlserver.service.port }}
+{{- end }}

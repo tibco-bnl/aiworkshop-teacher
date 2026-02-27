@@ -6,7 +6,13 @@
 
 # Override replica count for cost optimization
 # Set to 0 when not in use to stop billing
-replicaCount: 0
+replicaCount: 1
+
+# Namespace configuration
+namespace: ai
+
+# Override naming 
+#fullnameOverride: "ai"
 
 # Ollama image configuration
 ollama:
@@ -70,6 +76,21 @@ service:
   ollama:
     port: 80
     targetPort: 11434
+
+# Ingress configuration for external access
+ingress:
+  enabled: true
+  host: ai-ollama.dp1.atsnl-emea.azure.dataplanes.pro
+  ssl:
+    enabled: false
+    clusterIssuer: letsencrypt-prod
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
 
 # Storage: Use ephemeral for auto-scaling (models re-download on pod start)
 # For persistent storage, change ephemeral to false and enable PVC

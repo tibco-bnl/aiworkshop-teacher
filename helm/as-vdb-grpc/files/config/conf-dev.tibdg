@@ -1,0 +1,7 @@
+grid create copyset_size=1 default_client_proxy_transport=auto
+copyset create cs_01
+node create --copyset cs_01 --dir /data/cs_01.n_1_data cs_01.n_1
+keeper create --dir /data/k_0_data k_0
+proxy create p_00
+table create t1 key long
+column create t1 value string

@@ -1,0 +1,40 @@
+{{- if and .Values.ollama.enabled .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "ai-workshop.fullname" . }}
+  namespace: {{ .Values.namespace | default "default" }}
+  labels:
+    {{- include "ai-workshop.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ollama-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- if .Values.ingress.ssl.enabled }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.ssl.clusterIssuer }}
+    {{- else }}
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    {{- end }}
+    {{- if .Values.ingress.annotations }}
+    {{- toYaml .Values.ingress.annotations | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  {{- if .Values.ingress.ssl.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ include "ai-workshop.fullname" . }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "ai-workshop.fullname" . }}
+                port:
+                  number: {{ .Values.service.ollama.port }}
+{{- end }}

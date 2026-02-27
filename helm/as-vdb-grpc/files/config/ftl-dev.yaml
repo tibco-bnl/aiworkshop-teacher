@@ -1,0 +1,17 @@
+globals:
+  core.servers:
+    ftl0: as-vdb-grpc-ftlserver:13031
+    
+servers:
+  ftl0:
+  - realm:
+      data: /data/ftlserver_0_data
+      auth.providers: file:///config/ftlusers.conf
+  - tibdgkeeper:
+      exepath: /opt/tibco/as/current-version/bin/tibdgkeeper
+      name: k_0
+  - tibdgadminsvc:
+      exepath: /opt/tibco/as/current-version/bin/tibdgadminsvc
+  - tibdgadminsvc:
+      exepath: /opt/tibco/as/current-version/bin/tibdgadminsvc
+
