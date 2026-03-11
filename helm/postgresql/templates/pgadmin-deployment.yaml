@@ -51,13 +51,28 @@ spec:
             - name: PGADMIN_DISABLE_POSTFIX
               value: "true"
             - name: PGADMIN_CONFIG_SERVER_MODE
-              value: "False"
+              value: "True"
             - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
               value: "False"
           volumeMounts:
             - name: pgadmin-config
               mountPath: /pgadmin4/servers.json
               subPath: servers.json
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    # Wait for pgAdmin to be ready and then create additional user
+                    sleep 60 && \
+                    cd /pgadmin4 && \
+                    python setup.py \
+                      --load-servers /pgadmin4/servers.json \
+                      --user tibco@atsbnl.com \
+                      --password 'tibco!2026' \
+                      || echo "User creation failed or user already exists"
           resources:
             {{- toYaml .Values.pgadmin.resources | nindent 12 }}
           livenessProbe:

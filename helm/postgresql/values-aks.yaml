@@ -22,9 +22,10 @@ postgresql:
     pullPolicy: IfNotPresent
   
   service:
-    type: ClusterIP
+    type: LoadBalancer
     port: 5432
     targetPort: 5432
+    # LoadBalancer will get its own external IP for JDBC access
   
   # Database configuration
   database:
