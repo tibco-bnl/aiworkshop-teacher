@@ -1,0 +1,140 @@
+# Global configuration
+global:
+ 
+  # Target namespace for deployment
+  namespace: ai
+  
+  # Create namespace if it doesn't exist
+  createNamespace: false
+
+  # Image registry configuration
+  imageRegistry: ""  # Use Docker Hub by default
+
+# Core DNS name for ingress hosts
+coreDnsName: "localhost"
+
+# PostgreSQL configuration
+postgresql:
+  enabled: true
+  image:
+    repository: postgres
+    tag: "15.5"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 5432
+    targetPort: 5432
+  
+  # Database configuration
+  database:
+    name: postgres
+    user: postgres
+    # Password will be set via secret
+  
+  # Persistent volume configuration
+  persistence:
+    enabled: true
+    storageClass: ""  # Use default storage class
+    accessMode: ReadWriteOnce
+    size: 20Gi
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+# pgAdmin configuration
+pgadmin:
+  enabled: true
+  image:
+    repository: dpage/pgadmin4
+    tag: "8.3"
+    pullPolicy: IfNotPresent
+  
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 80
+  
+  # pgAdmin configuration
+  config:
+    email: "admin@example.com"
+    # Password will be set via secret
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# Service Account
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+  imagePullSecrets: []
+
+# Pod Security Context
+podSecurityContext:
+  fsGroup: 999  # postgres group
+
+# Security Context
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: false
+  runAsNonRoot: true
+  runAsUser: 999  # postgres user
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
+
+# Ingress configuration
+ingress:
+  enabled: false  # Disabled by default for non-AKS
+  className: "nginx"
+  createMiddleware: false
+  annotations: {}
+  
+  # IP whitelist configuration - empty for non-AKS
+  whitelistSourceRanges: []
+  
+  # PostgreSQL ingress (typically not exposed)
+  postgresql:
+    enabled: false
+    host: ai-postgresql
+    path: /
+    pathType: Prefix
+    tls:
+      enabled: false
+      secretName: postgresql-tls
+  
+  # pgAdmin ingress
+  pgadmin:
+    enabled: false
+    host: ai-pgadmin
+    path: /
+    pathType: Prefix
+    tls:
+      enabled: false
+      secretName: pgadmin-tls
+
+# Secret configuration for passwords
+secrets:
+  postgresql:
+    password: "postgres123"  # Change this in production
+  pgadmin:
+    password: "admin123"  # Change this in production

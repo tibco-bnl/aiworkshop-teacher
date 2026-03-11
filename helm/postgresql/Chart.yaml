@@ -1,0 +1,16 @@
+apiVersion: v2
+name: postgresql
+description: A Helm chart for PostgreSQL database with pgAdmin
+type: application
+version: 0.1.0
+appVersion: "15.0"
+keywords:
+  - postgresql
+  - database
+  - pgadmin
+  - admin
+maintainers:
+  - name: TIBCO BNL ATS Team
+home: https://github.com/tibco/postgresql-chart
+sources:
+  - https://github.com/tibco/postgresql-chart

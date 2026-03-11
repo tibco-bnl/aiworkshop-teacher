@@ -1,0 +1,11 @@
+{{- if and .Values.global.createNamespace .Values.global.namespace }}
+{{- if ne (include "postgresql.namespace" .) .Release.Namespace }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ include "postgresql.namespace" . }}
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+    app.kubernetes.io/component: namespace
+{{- end }}
+{{- end }}
