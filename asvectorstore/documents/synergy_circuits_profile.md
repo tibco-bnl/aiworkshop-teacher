@@ -1,12 +1,12 @@
-# Synergy Circuits - Corporate Information
+# Flux Matrix Inc. - Corporate Information
 
 ## Company Overview
 
-**Synergy Circuits** is a San Francisco-based fabless semiconductor company that designs high-performance mixed-signal and analog chips. The company specializes in solutions for data centers, 5G infrastructure, and high-end audio, focusing on data converters (ADCs/DACs), timing, and power management ICs.
+**Flux Matrix Inc.** is a San Francisco-based fabless semiconductor company that designs high-performance mixed-signal and analog chips. The company specializes in solutions for data centers, 5G infrastructure, and high-end audio, focusing on data converters (ADCs/DACs), timing, and power management ICs.
 
 **Corporate Details:**
-- **Headquarters:** 456 Commerce St, Suite 200, San Francisco, CA 94105, USA
-- **Contact:** contact@synergycircuits.com | +1-555-123-4567
+- **Headquarters:** 321 Void Street, Suite 9, Oakland, CA 94612, USA
+- **Contact:** hello@fluxmatrix.local | +1-555-123-4567
 - **Founded:** 2019
 - **Industry:** Fabless Semiconductor (Analog & Mixed-Signal)
 - **Employee Count:** 850 (as of 2025)
@@ -89,7 +89,7 @@ Our "Precision Data" strategy focuses on:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a fabless analog design house, Synergy Circuits relies heavily on complex simulation and modeling, which is computationally intensive.
+As a fabless analog design house, Flux Matrix Inc. relies heavily on complex simulation and modeling, which is computationally intensive.
 
 **AI & Machine Learning Infrastructure:**
 - **High-Core-Count CPUs:** The primary requirement for running complex analog, mixed-signal, and SPICE simulations (e.g., Cadence Spectre).
@@ -129,7 +129,7 @@ As a fabless analog design house, Synergy Circuits relies heavily on complex sim
 
 - **Customer ID:** 11
 - **Account Created:** 2025-07-30T08:54:57.526397Z
-- **Billing Address:** 456 Commerce St, Suite 200, San Francisco, CA 94105, USA
+- **Billing Address:** 321 Void Street, Suite 9, Oakland, CA 94612, USA
 - **Shipping Address:** 789 Logistics Ave, Warehouse B, Oakland, CA 94621, USA
 
 ---

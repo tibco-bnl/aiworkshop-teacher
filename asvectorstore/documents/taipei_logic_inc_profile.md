@@ -1,12 +1,12 @@
-# Taipei Logic Inc. - Corporate Information
+# Nova Bit Foundry - Corporate Information
 
 ## Company Overview
 
-**Taipei Logic Inc.** is a fabless semiconductor company based in Taipei, Taiwan. The company designs high-performance, low-power logic chips (CPUs, GPUs, and APUs) for the edge computing, automotive, and consumer electronics markets. Taipei Logic is a key player in the Taiwanese "Silicon Shield" ecosystem.
+**Nova Bit Foundry** is a fabless semiconductor company based in Taipei, Taiwan. The company designs high-performance, low-power logic chips (CPUs, GPUs, and APUs) for the edge computing, automotive, and consumer electronics markets. Nova Bit Foundry is a key player in the Taiwanese "Silicon Shield" ecosystem.
 
 **Corporate Details:**
-- **Headquarters:** 55 Xinyi Rd, Taipei, Taiwan
-- **Contact:** contact@taipeilogic.tw | +886 2 8765 4321
+- **Headquarters:** 12 Empty Plaza, Da'an District, Taipei, Taiwan
+- **Contact:** team@novabit.test | +886 2 8765 4321
 - **Founded:** 2017
 - **Industry:** Fabless Semiconductor Design
 - **Employee Count:** 1,800 (as of 2025)
@@ -89,7 +89,7 @@ Our "Edge Intelligence" strategy is built on three pillars:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a fabless design house, Taipei Logic's entire "factory" is its data center, used for chip design, simulation, and verification.
+As a fabless design house, Nova Bit Foundry's entire "factory" is its data center, used for chip design, simulation, and verification.
 
 **AI & Machine Learning Infrastructure:**
 - **High-Core-Count CPUs:** Massive clusters for Electronic Design Automation (EDA) simulation, logic verification, and place-and-route.
@@ -128,8 +128,8 @@ As a fabless design house, Taipei Logic's entire "factory" is its data center, u
 
 - **Customer ID:** 6
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 55 Xinyi Rd, Taipei, Taiwan
-- **Shipping Address:** 55 Xinyi Rd, Taipei, Taiwan
+- **Billing Address:** 12 Empty Plaza, Da'an District, Taipei, Taiwan
+- **Shipping Address:** 12 Empty Plaza, Da'an District, Taipei, Taiwan
 
 ---
 

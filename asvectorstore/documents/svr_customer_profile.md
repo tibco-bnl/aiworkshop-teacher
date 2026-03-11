@@ -1,12 +1,12 @@
-# Silicon Valley Robotics - Corporate Information
+# Vertex Prime Dynamics - Corporate Information
 
 ## Company Overview
 
-**Silicon Valley Robotics** is a leading robotics technology company headquartered in Palo Alto, California. Founded in 2019, SVR specializes in developing advanced autonomous systems for industrial automation, service robotics, and AI-powered robotic solutions.
+**Vertex Prime Dynamics** is a leading robotics technology company headquartered in Palo Alto, California. Founded in 2019, Vertex Prime Dynamics specializes in developing advanced autonomous systems for industrial automation, service robotics, and AI-powered robotic solutions.
 
 **Corporate Details:**
-- **Headquarters:** 789 Innovation Dr, Palo Alto, CA, USA
-- **Contact:** procurement@svrobotics.com | +1 415 555 0101
+- **Headquarters:** 404 Nonexistent Blvd, San Francisco, CA 94107, USA
+- **Contact:** inbox@vertexprime.corp | +1 415 555 0101
 - **Founded:** 2019
 - **Industry:** Advanced Robotics & AI Systems
 - **Employee Count:** 1,247 (as of 2025)
@@ -198,4 +198,4 @@ As a robotics company processing massive amounts of sensor data in real-time, SV
 **Document Classification:** Public  
 **Last Updated:** August 2025  
 **Next Review:** February 2026  
-**Contact:** investor.relations@svrobotics.com
+**Contact:** investor.relations@vertexprime.corp

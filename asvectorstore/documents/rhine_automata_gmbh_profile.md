@@ -1,12 +1,12 @@
-# Rhine Automata GmbH - Corporate Information
+# Nebula Gearworks KGaA - Corporate Information
 
 ## Company Overview
 
-**Rhine Automata GmbH** is a German engineering firm at the forefront of the Industrie 4.0 revolution. Headquartered in Berlin, Rhine Automata specializes in advanced robotics, autonomous logistics systems, and AI-driven manufacturing processes. The company is a key partner to Germany's automotive, pharmaceutical, and logistics sectors.
+**Nebula Gearworks KGaA** is a German engineering firm at the forefront of the Industrie 4.0 revolution. Headquartered in Berlin, Nebula Gearworks KGaA specializes in advanced robotics, autonomous logistics systems, and AI-driven manufacturing processes. The company is a key partner to Germany's automotive, pharmaceutical, and logistics sectors.
 
 **Corporate Details:**
-- **Headquarters:** 45 Schillerstraße, Berlin, Germany
-- **Contact:** info@rhineauto.de | +49 30 98765432
+- **Headquarters:** 909 Imaginary Way, 10115 Berlin, Germany
+- **Contact:** contact@nebulagear.example | +49 30 98765432
 - **Founded:** 2018
 - **Industry:** Robotics & Industrial Automation
 - **Employee Count:** 1,950 (as of 2025)
@@ -94,7 +94,7 @@ Our "Automation Unbemannt" (Unmanned Automation) strategy focuses on:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a leader in AI and robotics, Rhine Automata's R&D relies heavily on advanced computing for simulation, model training, and data processing.
+As a leader in AI and robotics, Nebula Gearworks KGaA's R&D relies heavily on advanced computing for simulation, model training, and data processing.
 
 **AI & Machine Learning Infrastructure:**
 - **AI Acceleration Processors:** Training deep learning models for machine vision and navigation.
@@ -135,8 +135,8 @@ As a leader in AI and robotics, Rhine Automata's R&D relies heavily on advanced 
 
 - **Customer ID:** 2
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 45 Schillerstraße, Berlin, Germany
-- **Shipping Address:** 45 Schillerstraße, Berlin, Germany
+- **Billing Address:** 909 Imaginary Way, 10115 Berlin, Germany
+- **Shipping Address:** 909 Imaginary Way, 10115 Berlin, Germany
 
 ---
 

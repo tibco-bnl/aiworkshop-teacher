@@ -1,12 +1,12 @@
-# Maple Innovations - Corporate Information
+# Iron Spruce Tech - Corporate Information
 
 ## Company Overview
 
-**Maple Innovations** is a Canadian software company based in Toronto, specializing in data analytics and artificial intelligence platforms. The company provides cloud-native solutions for business intelligence (BI), predictive analytics, and data governance, primarily serving the financial services, retail, and natural resources sectors.
+**Iron Spruce Tech** is a Canadian software company based in Toronto, specializing in data analytics and artificial intelligence platforms. The company provides cloud-native solutions for business intelligence (BI), predictive analytics, and data governance, primarily serving the financial services, retail, and natural resources sectors.
 
 **Corporate Details:**
-- **Headquarters:** 200 University Ave, Toronto, ON, Canada
-- **Contact:** buy@mapleinnovations.ca | +1 416 555 0199
+- **Headquarters:** 88 Timber Trail, Ottawa, ON K1P 5J2, Canada
+- **Contact:** orders@ironspruce.internal | +1 416 555 0199
 - **Founded:** 2018
 - **Industry:** SaaS & Data Analytics
 - **Employee Count:** 1,100 (as of 2025)
@@ -91,7 +91,7 @@ Our "Data Clarity" strategy is built on three pillars:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a cloud-native SaaS company, Maple Innovations's entire operation runs on cloud HPC. They also require significant compute for their own R&D.
+As a cloud-native SaaS company, Iron Spruce Tech's entire operation runs on cloud HPC. They also require significant compute for their own R&D.
 
 **AI & Machine Learning Infrastructure:**
 - **AI Acceleration Processors:** Training large generative models for their natural language query feature.
@@ -132,8 +132,8 @@ As a cloud-native SaaS company, Maple Innovations's entire operation runs on clo
 
 - **Customer ID:** 9
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 200 University Ave, Toronto, ON, Canada
-- **Shipping Address:** 200 University Ave, Toronto, ON, Canada
+- **Billing Address:** 88 Timber Trail, Ottawa, ON K1P 5J2, Canada
+- **Shipping Address:** 88 Timber Trail, Ottawa, ON K1P 5J2, Canada
 
 ---
 

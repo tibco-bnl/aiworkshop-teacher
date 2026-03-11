@@ -1,12 +1,12 @@
-# Dragon Chip Corp. - Corporate Information
+# Cinnabar Logic Co. - Corporate Information
 
 ## Company Overview
 
-**Dragon Chip Corp.** is a rapidly growing fabless semiconductor company headquartered in Shenzhen, China. The company designs high-performance System-on-a-Chip (SoC) solutions, specializing in AI-powered processors for smart devices, consumer electronics, and video surveillance. Dragon Chip is a key player in China's "Made in China 2025" initiative.
+**Cinnabar Logic Co.** is a rapidly growing fabless semiconductor company headquartered in Shenzhen, China. The company designs high-performance System-on-a-Chip (SoC) solutions, specializing in AI-powered processors for smart devices, consumer electronics, and video surveillance. Cinnabar Logic Co. is a key player in China's "Made in China 2025" initiative.
 
 **Corporate Details:**
-- **Headquarters:** 8 Keji South Road, Shenzhen, China
-- **Contact:** admin@dragonchip.cn | +86 755 8888 9999
+- **Headquarters:** 99 Fake Tech Park, Nanshan, Shenzhen, China
+- **Contact:** admin@cinnabarlogic.test | +86 755 8888 9999
 - **Founded:** 2017
 - **Industry:** Fabless Semiconductor Design
 - **Employee Count:** 2,200 (as of 2025)
@@ -90,7 +90,7 @@ Our "Intelligent Core" (智能核心) strategy is focused on:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a major fabless design house, Dragon Chip requires massive data centers for Electronic Design Automation (EDA), simulation, and verification.
+As a major fabless design house, Cinnabar Logic Co. requires massive data centers for Electronic Design Automation (EDA), simulation, and verification.
 
 **AI & Machine Learning Infrastructure:**
 - **High-Core-Count CPUs:** The workhorse for logic simulation, verification, and physical design (place-and-route).
@@ -129,8 +129,8 @@ As a major fabless design house, Dragon Chip requires massive data centers for E
 
 - **Customer ID:** 10
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 8 Keji South Road, Shenzhen, China
-- **Shipping Address:** 8 Keji South Road, Shenzhen, China
+- **Billing Address:** 99 Fake Tech Park, Nanshan, Shenzhen, China
+- **Shipping Address:** 99 Fake Tech Park, Nanshan, Shenzhen, China
 
 ---
 

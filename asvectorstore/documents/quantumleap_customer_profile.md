@@ -1,12 +1,12 @@
-# QuantumLeap B.V. - Corporate Information
+# AetherVortex Solutions - Corporate Information
 
 ## Company Overview
 
-**QuantumLeap B.V.** is a pioneering quantum computing technology company headquartered in Eindhoven, Netherlands. Established in 2018, QuantumLeap specializes in developing quantum processors, quantum networking solutions, and quantum-classical hybrid computing systems for enterprise and research applications.
+**AetherVortex Solutions** is a pioneering quantum computing technology company headquartered in Eindhoven, Netherlands. Established in 2018, AetherVortex Solutions specializes in developing quantum processors, quantum networking solutions, and quantum-classical hybrid computing systems for enterprise and research applications.
 
 **Corporate Details:**
-- **Headquarters:** 123 High Tech Campus, Eindhoven, Netherlands
-- **Contact:** contact@quantumleap.nl | +31 6 12345678
+- **Headquarters:** 77 False Lane, 1011 AB Amsterdam, Netherlands
+- **Contact:** hello@aethervortex.test | +31 6 12345678
 - **Founded:** 2018
 - **Industry:** Quantum Computing & Advanced Computing Systems
 - **Employee Count:** 389 (as of 2025)
@@ -168,7 +168,7 @@ Smit    Weber   Petersen     Bakker   Silva   Hoogers
 ## Quantum Technology Infrastructure
 
 ### Quantum Computing Architecture
-QuantumLeap's quantum systems require ultra-specialized semiconductor components:
+AetherVortex Solutions's quantum systems require ultra-specialized semiconductor components:
 
 - **Ultra-Low Noise Amplifiers** for quantum state readout
 - **High-Speed DACs/ADCs** for quantum control and measurement
@@ -257,4 +257,4 @@ QuantumLeap's quantum systems require ultra-specialized semiconductor components
 **Document Classification:** Public  
 **Last Updated:** August 2025  
 **Next Review:** February 2026  
-**Contact:** investor.relations@quantumleap.nl
+**Contact:** investor.relations@aethervortex.test

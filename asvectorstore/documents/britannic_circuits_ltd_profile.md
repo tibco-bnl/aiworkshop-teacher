@@ -1,12 +1,12 @@
-# Britannic Circuits Ltd. - Corporate Information
+# Cobalt Spark Ltd. - Corporate Information
 
 ## Company Overview
 
-**Britannic Circuits Ltd.** is a leading UK-based designer and manufacturer of high-performance radio frequency (RF) systems and compound semiconductors. Headquartered in London with R&D facilities in Cambridge, the company provides critical components for the telecommunications, defense, and aerospace markets.
+**Cobalt Spark Ltd.** is a leading UK-based designer and manufacturer of high-performance radio frequency (RF) systems and compound semiconductors. Headquartered in London with R&D facilities in Cambridge, the company provides critical components for the telecommunications, defense, and aerospace markets.
 
 **Corporate Details:**
-- **Headquarters:** 7 London Wall, London, UK
-- **Contact:** accounts@britcircuits.co.uk | +44 20 7946 0123
+- **Headquarters:** 55 Shadow Grove, Manchester, M1 1ET, UK
+- **Contact:** reachout@cobaltspark.example | +44 20 7946 0123
 - **Founded:** 2015
 - **Industry:** Semiconductors & RF Systems
 - **Employee Count:** 1,600 (as of 2025)
@@ -90,7 +90,7 @@ Our "Spectrum Dominance" strategy focuses on:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-Britannic Circuits relies on HPC for complex electromagnetic (EM) simulation, material science modeling, and chip design.
+Cobalt Spark Ltd. relies on HPC for complex electromagnetic (EM) simulation, material science modeling, and chip design.
 
 **AI & Machine Learning Infrastructure:**
 - **High-Core-Count CPUs:** Running complex RF and EM simulations (e.g., Ansys HFSS) which are CPU-intensive.
@@ -131,8 +131,8 @@ Britannic Circuits relies on HPC for complex electromagnetic (EM) simulation, ma
 
 - **Customer ID:** 7
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 7 London Wall, London, UK
-- **Shipping Address:** 7 London Wall, London, UK
+- **Billing Address:** 55 Shadow Grove, Manchester, M1 1ET, UK
+- **Shipping Address:** 55 Shadow Grove, Manchester, M1 1ET, UK
 
 ---
 

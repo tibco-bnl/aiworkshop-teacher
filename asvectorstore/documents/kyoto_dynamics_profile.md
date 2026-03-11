@@ -1,12 +1,12 @@
-# Kyoto Dynamics - Corporate Information
+# Zenith Flow Kyodai - Corporate Information
 
 ## Company Overview
 
-**Kyoto Dynamics** is a Japanese technology pioneer specializing in the fusion of advanced robotics and artificial intelligence. Headquartered in the historic city of Kyoto, the company is globally recognized for its state-of-the-art humanoid robotics, computer vision systems, and dynamic control algorithms. Kyoto Dynamics serves sectors ranging from healthcare to entertainment and industrial inspection.
+**Zenith Flow Kyodai** is a Japanese technology pioneer specializing in the fusion of advanced robotics and artificial intelligence. Headquartered in the historic city of Kyoto, the company is globally recognized for its state-of-the-art humanoid robotics, computer vision systems, and dynamic control algorithms. Zenith Flow Kyodai serves sectors ranging from healthcare to entertainment and industrial inspection.
 
 **Corporate Details:**
-- **Headquarters:** 321 Kiyamachi Dori, Kyoto, Japan
-- **Contact:** orders@kyotodynamics.jp | +81 75 234 5678
+- **Headquarters:** 8-8-8 Mock Street, Shinjuku, Tokyo, Japan
+- **Contact:** staff@zenithflow.internal | +81 75 234 5678
 - **Founded:** 2016
 - **Industry:** Advanced Robotics & Artificial Intelligence
 - **Employee Count:** 2,400 (as of 2025)
@@ -95,7 +95,7 @@ Our "Intelligent Co-existence" framework is built on four pillars:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-Kyoto Dynamics's work in dynamic simulation and AI training requires massive computational power.
+Zenith Flow Kyodai's work in dynamic simulation and AI training requires massive computational power.
 
 **AI & Machine Learning Infrastructure:**
 - **AI Acceleration Processors:** Training reinforcement learning models for locomotion and manipulation.
@@ -135,8 +135,8 @@ Kyoto Dynamics's work in dynamic simulation and AI training requires massive com
 
 - **Customer ID:** 4
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 321 Kiyamachi Dori, Kyoto, Japan
-- **Shipping Address:** 321 Kiyamachi Dori, Kyoto, Japan
+- **Billing Address:** 8-8-8 Mock Street, Shinjuku, Tokyo, Japan
+- **Shipping Address:** 8-8-8 Mock Street, Shinjuku, Tokyo, Japan
 
 ---
 

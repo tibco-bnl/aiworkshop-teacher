@@ -1,14 +1,14 @@
 #Content#
 This document contains instructions for the setup of the active spaces (and the population of the databases) required for the AI workshop
 
-Step 1: Edit the .env file
-Make sure the variable 'FTL_URL' points to the ftl container (deployed as part of AS) on the data plane.
-
-Step 2: Go to script directory
-
+Step 1: Go to script directory
 ```bash
 cd scripts
 ```
+
+Step 2: Edit the .env file
+Make sure the variable 'FTL_URL' points to the ftl container (deployed as part of AS) on the data plane.
+
 
 Step 3: Create the required tables in Active Spaces. Please mind: existing tables will be deleted first!
 

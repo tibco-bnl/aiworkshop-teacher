@@ -1,12 +1,12 @@
-# Parisian Tech Group - Corporate Information
+# Lumière Synthétique - Corporate Information
 
 ## Company Overview
 
-**Parisian Tech Group** is a leading French technology conglomerate headquartered in Paris, France. Founded in 2017, PTG operates across multiple high-technology sectors including artificial intelligence, fintech, smart city infrastructure, and telecommunications. The company represents the convergence of French engineering excellence with Silicon Valley innovation methodologies.
+**Lumière Synthétique** is a leading French technology conglomerate headquartered in Paris, France. Founded in 2017, Lumière Synthétique operates across multiple high-technology sectors including artificial intelligence, fintech, smart city infrastructure, and telecommunications. The company represents the convergence of French engineering excellence with Silicon Valley innovation methodologies.
 
 **Corporate Details:**
-- **Headquarters:** 45 Avenue des Champs-Élysées, 8th Arrondissement, Paris, France
-- **Contact:** corporate@parisiantech.fr | +33 1 42 68 53 00
+- **Headquarters:** 14 Rue de l'Invention, 75001 Paris, France
+- **Contact:** contact@lumieresyn.corp | +33 1 42 68 53 00
 - **Founded:** 2017
 - **Industry:** Technology Conglomerate & Digital Innovation
 - **Employee Count:** 2,847 (as of 2025)
@@ -195,7 +195,7 @@ Dr. Antoine Moreau  Isabelle Rousseau  Jean-Luc Petit
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-As a technology conglomerate processing massive datasets and running complex AI workloads, PTG requires cutting-edge semiconductor solutions:
+As a technology conglomerate processing massive datasets and running complex AI workloads, Lumière Synthétique requires cutting-edge semiconductor solutions:
 
 **AI & Machine Learning Infrastructure:**
 - **AI Acceleration Processors** - For training large language models in French
@@ -308,4 +308,4 @@ As a technology conglomerate processing massive datasets and running complex AI 
 **Document Classification:** Public  
 **Last Updated:** August 2025  
 **Next Review:** February 2026  
-**Contact:** relations.investisseurs@parisiantech.fr**
+**Contact:** relations.investisseurs@lumieresyn.corp**

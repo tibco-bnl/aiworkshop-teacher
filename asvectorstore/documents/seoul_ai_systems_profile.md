@@ -1,12 +1,12 @@
-# Seoul AI Systems - Corporate Information
+# Horizon Core Systems - Corporate Information
 
 ## Company Overview
 
-**Seoul AI Systems (SAIS)** is a leading South Korean technology company specializing in applied artificial intelligence and large-scale data processing. Based in the vibrant Gangnam district, SAIS develops AI-driven solutions for e-commerce, finance, and media, with a focus on natural language processing (NLP) and predictive analytics.
+**Horizon Core Systems (HCS)** is a leading South Korean technology company specializing in applied artificial intelligence and large-scale data processing. Based in the vibrant Gangnam district, HCS develops AI-driven solutions for e-commerce, finance, and media, with a focus on natural language processing (NLP) and predictive analytics.
 
 **Corporate Details:**
-- **Headquarters:** 101 Gangnam-daero, Seoul, South Korea
-- **Contact:** sourcing@seoulaisys.kr | +82 2 1234 5678
+- **Headquarters:** 42 Fiction Road, Seocho-gu, Seoul, South Korea
+- **Contact:** ops@horizoncore.local | +82 2 1234 5678
 - **Founded:** 2019
 - **Industry:** Artificial Intelligence & Big Data
 - **Employee Count:** 1,350 (as of 2025)
@@ -92,7 +92,7 @@ Our "AI Everywhere" strategy is guided by three core pillars:
 ## Technology Infrastructure & Computing Requirements
 
 ### High-Performance Computing Architecture
-SAIS's primary operational cost is compute, required for training massive LLMs and processing real-time analytics.
+HCS's primary operational cost is compute, required for training massive LLMs and processing real-time analytics.
 
 **AI & Machine Learning Infrastructure:**
 - **AI Acceleration Processors:** Massive clusters for training and fine-tuning generative models.
@@ -133,8 +133,8 @@ SAIS's primary operational cost is compute, required for training massive LLMs a
 
 - **Customer ID:** 5
 - **Account Created:** 2025-07-22T08:34:15.276517Z
-- **Billing Address:** 101 Gangnam-daero, Seoul, South Korea
-- **Shipping Address:** 101 Gangnam-daero, Seoul, South Korea
+- **Billing Address:** 42 Fiction Road, Seocho-gu, Seoul, South Korea
+- **Shipping Address:** 42 Fiction Road, Seocho-gu, Seoul, South Korea
 
 ---
 
