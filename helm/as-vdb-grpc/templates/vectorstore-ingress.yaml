@@ -1,0 +1,49 @@
+{{- if and .Values.ingress.enabled .Values.ingress.vectorstore.enabled .Values.vectorstore.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-vectorstore
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: vectorstore-ingress
+  {{- $annotations := dict }}
+  {{- if .Values.ingress.annotations }}
+    {{- $annotations = .Values.ingress.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.vectorstore.annotations }}
+    {{- $annotations = merge $annotations .Values.ingress.vectorstore.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.className }}
+    {{- $annotations = merge $annotations (dict "kubernetes.io/ingress.class" .Values.ingress.className) }}
+  {{- end }}
+  {{- if .Values.ingress.whitelistSourceRanges }}
+    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+  {{- end }}
+  {{- if $annotations }}
+  annotations:
+    {{- toYaml $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.vectorstore.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ printf "%s.%s" .Values.ingress.vectorstore.host .Values.coreDnsName | quote }}
+      secretName: {{ .Values.ingress.vectorstore.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.ingress.vectorstore.host .Values.coreDnsName | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.vectorstore.path }}
+            pathType: {{ .Values.ingress.vectorstore.pathType }}
+            backend:
+              service:
+                name: {{ include "as-vdb-grpc.fullname" . }}-vectorstore
+                port:
+                  number: {{ .Values.vectorstore.service.port }}
+{{- end }}

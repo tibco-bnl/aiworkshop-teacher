@@ -1,0 +1,93 @@
+{{- if .Values.config.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-config
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
+spec:
+  backoffLimit: 3
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        {{- include "as-vdb-grpc.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: config
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "as-vdb-grpc.serviceAccountName" . }}
+      initContainers:
+        - name: wait-for-ftlserver
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for FTL server to be ready..."
+              until nc -z {{ include "as-vdb-grpc.fullname" . }}-ftlserver {{ .Values.ftlserver.service.port }}; do
+                echo "FTL server not ready, sleeping..."
+                sleep 5
+              done
+              echo "FTL server is ready!"
+      containers:
+        - name: config
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "as-vdb-grpc.imageRepository" (dict "root" . "image" .Values.config.image) }}:{{ include "as-vdb-grpc.imageTag" (dict "tag" .Values.config.image.tag "defaultTag" .Values.global.asVersion) }}
+          imagePullPolicy: {{ .Values.config.image.pullPolicy }}
+          args:
+            - "-r"
+            - "http://{{ include "as-vdb-grpc.fullname" . }}-ftlserver:{{ .Values.ftlserver.service.port }}"
+            - "--wait-for-realm"
+            - "{{ .Values.config.command.waitForRealm }}"
+            - "-s"
+            - "{{ .Values.config.command.configPath }}"
+          {{- if or .Values.config.tibdgConfig .Values.persistence.enabled }}
+          volumeMounts:
+            {{- if .Values.config.tibdgConfig }}
+            - name: config
+              mountPath: /config/conf-dev.tibdg
+              subPath: conf-dev.tibdg
+              readOnly: true
+            {{- end }}
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.config.resources | nindent 12 }}
+      {{- if or .Values.config.tibdgConfig .Values.persistence.enabled }}
+      volumes:
+        {{- if .Values.config.tibdgConfig }}
+        - name: config
+          configMap:
+            name: {{ include "as-vdb-grpc.fullname" . }}-config
+        {{- end }}
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "as-vdb-grpc.fullname" . }}-data
+        {{- end }}
+      {{- end }}
+      restartPolicy: OnFailure
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

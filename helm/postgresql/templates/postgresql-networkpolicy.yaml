@@ -1,0 +1,43 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "postgresql.fullname" . }}-network-policy
+  namespace: {{ include "postgresql.namespace" . }}
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+    app.kubernetes.io/component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "postgresql.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: postgresql
+  policyTypes:
+  - Ingress
+  ingress:
+  # Allow ingress from pgAdmin pods
+  - from:
+    - podSelector:
+        matchLabels:
+          {{- include "postgresql.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: pgadmin
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Allow ingress from pods in the same namespace (for internal cluster access)
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: {{ include "postgresql.namespace" . }}
+    ports:
+    - protocol: TCP
+      port: 5432
+  # Note: NodePort external access cannot be restricted via NetworkPolicy
+  # External firewall rules must be configured for the whitelisted IPs:
+  {{- if .Values.ingress.whitelistSourceRanges }}
+  # Configure your firewall/security groups to allow these IPs:
+  {{- range .Values.ingress.whitelistSourceRanges }}
+  # - {{ . }}
+  {{- end }}
+  {{- end }}
+{{- end }}

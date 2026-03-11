@@ -1,0 +1,32 @@
+{{- if .Values.pgadmin.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgresql.fullname" . }}-pgadmin-config
+  namespace: {{ include "postgresql.namespace" . }}
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+    app.kubernetes.io/component: pgadmin-config
+data:
+  servers.json: |
+    {
+      "Servers": {
+        "1": {
+          "Name": "PostgreSQL",
+          "Group": "Servers",
+          "Host": "{{ include "postgresql.fullname" . }}-postgresql",
+          "Port": {{ .Values.postgresql.service.port }},
+          "MaintenanceDB": "{{ .Values.postgresql.database.name }}",
+          "Username": "{{ .Values.postgresql.database.user }}",
+          "SSLMode": "prefer",
+          "SSLCert": "<STORAGE_DIR>/.postgresql/postgresql.crt",
+          "SSLKey": "<STORAGE_DIR>/.postgresql/postgresql.key",
+          "SSLCompression": 0,
+          "Timeout": 10,
+          "UseSSHTunnel": 0,
+          "TunnelPort": "22",
+          "TunnelAuthentication": 0
+        }
+      }
+    }
+{{- end }}

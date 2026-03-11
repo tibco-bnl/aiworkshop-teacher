@@ -1,0 +1,14 @@
+apiVersion: v2
+name: docling-chart
+description: A Helm chart for deploying Docling document processing service
+type: application
+version: 0.1.0
+appVersion: "latest"
+keywords:
+  - docling
+  - document-processing
+  - ai
+  - machine-learning
+maintainers:
+  - name: AI Workshop Team
+    email: workshop@example.com

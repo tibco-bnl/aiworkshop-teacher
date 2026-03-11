@@ -1,0 +1,53 @@
+{{- if and .Values.ingress.enabled .Values.ingress.postgresql.enabled .Values.postgresql.enabled }}
+# WARNING: Exposing PostgreSQL directly via HTTP ingress is not recommended for security reasons
+# This template is provided only for special use cases - consider using kubectl port-forward instead
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "postgresql.fullname" . }}-postgresql
+  namespace: {{ include "postgresql.namespace" . }}
+  labels:
+    {{- include "postgresql.labels" . | nindent 4 }}
+    app.kubernetes.io/component: postgresql-ingress
+  {{- $annotations := dict }}
+  {{- if .Values.ingress.annotations }}
+    {{- $annotations = .Values.ingress.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.postgresql.annotations }}
+    {{- $annotations = merge $annotations .Values.ingress.postgresql.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.className }}
+    {{- $annotations = merge $annotations (dict "kubernetes.io/ingress.class" .Values.ingress.className) }}
+  {{- end }}
+  {{- if .Values.ingress.whitelistSourceRanges }}
+    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+  {{- end }}
+  # Add TCP stream annotations for PostgreSQL
+  {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/tcp-services-configmap" (printf "%s/tcp-services" (include "postgresql.namespace" .))) }}
+  {{- if $annotations }}
+  annotations:
+    {{- toYaml $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.postgresql.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ printf "%s.%s" .Values.ingress.postgresql.host .Values.coreDnsName | quote }}
+      secretName: {{ .Values.ingress.postgresql.tls.secretName }}
+  {{- end }}
+  rules:
+    - host: {{ printf "%s.%s" .Values.ingress.postgresql.host .Values.coreDnsName | quote }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.postgresql.path }}
+            pathType: {{ .Values.ingress.postgresql.pathType }}
+            backend:
+              service:
+                name: {{ include "postgresql.fullname" . }}-postgresql
+                port:
+                  number: {{ .Values.postgresql.service.port }}
+{{- end }}

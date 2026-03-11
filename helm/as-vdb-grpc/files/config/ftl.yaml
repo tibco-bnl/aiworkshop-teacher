@@ -1,0 +1,31 @@
+globals:
+  core.servers:
+    ftl0: ftlserver_0:13031
+    ftl1: ftlserver_1:13131
+    ftl2: ftlserver_2:13231
+servers:
+  ftl0:
+  - realm:
+      data: /data/ftlserver_0_data
+  - tibdgkeeper:
+      exepath: /opt/tibco/as/current-version/bin/tibdgkeeper
+      name: k_0
+  - tibdgadminsvc:
+      exepath: /opt/tibco/as/current-version/bin/tibdgadminsvc
+  ftl1:
+  - realm:
+      data: /data/ftlserver_1_data
+  - tibdgkeeper:
+      exepath: /opt/tibco/as/current-version/bin/tibdgkeeper
+      name: k_1
+  - tibdgadminsvc:
+      exepath: /opt/tibco/as/current-version/bin/tibdgadminsvc
+  ftl2:
+  - realm:
+      data: /data/ftlserver_2_data
+  - tibdgkeeper:
+      exepath: /opt/tibco/as/current-version/bin/tibdgkeeper
+      name: k_2
+  - tibdgadminsvc:
+      exepath: /opt/tibco/as/current-version/bin/tibdgadminsvc
+

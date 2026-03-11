@@ -1,0 +1,86 @@
+{{- if .Values.tibdgnode.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-tibdgnode
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: tibdgnode
+spec:
+  replicas: {{ .Values.tibdgnode.replicas }}
+  selector:
+    matchLabels:
+      {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: tibdgnode
+  template:
+    metadata:
+      labels:
+        {{- include "as-vdb-grpc.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: tibdgnode
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "as-vdb-grpc.serviceAccountName" . }}
+      initContainers:
+        - name: wait-for-ftlserver
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              echo "Waiting for FTL server to be ready..."
+              until nc -z {{ include "as-vdb-grpc.fullname" . }}-ftlserver {{ .Values.ftlserver.service.port }}; do
+                echo "FTL server not ready, sleeping..."
+                sleep 5
+              done
+              echo "FTL server is ready!"
+        # - name: wait-for-config
+        #   image: busybox:1.35
+        #   command: ['sh', '-c']
+        #   args:
+        #     - |
+        #       echo "Waiting for config service to complete..."
+        #       # Add logic to wait for config service completion
+        #       sleep 30
+      containers:
+        - name: tibdgnode
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: {{ include "as-vdb-grpc.imageRepository" (dict "root" . "image" .Values.tibdgnode.image) }}:{{ include "as-vdb-grpc.imageTag" (dict "tag" .Values.tibdgnode.image.tag "defaultTag" .Values.global.asVersion) }}
+          imagePullPolicy: {{ .Values.tibdgnode.image.pullPolicy }}
+          args:
+            - "-r"
+            - http://{{ include "as-vdb-grpc.fullname" . }}-ftlserver:{{ .Values.ftlserver.service.port }}
+            - "-n"
+            - "{{ .Values.tibdgnode.command.name }}"
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          {{- end }}
+          resources:
+            {{- toYaml .Values.tibdgnode.resources | nindent 12 }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "as-vdb-grpc.fullname" . }}-data
+      {{- end }}
+      restartPolicy: Always
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

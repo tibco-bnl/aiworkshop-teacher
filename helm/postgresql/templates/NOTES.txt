@@ -1,0 +1,40 @@
+1. Get the application URL by running these commands:
+{{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.pgadmin.enabled }}
+  pgAdmin URL: http://{{ .Values.ingress.pgadmin.host }}.{{ .Values.coreDnsName }}{{ .Values.ingress.pgadmin.path }}
+{{- end }}
+{{- if .Values.ingress.postgresql.enabled }}
+  PostgreSQL URL: postgresql://{{ .Values.ingress.postgresql.host }}.{{ .Values.coreDnsName }}:{{ .Values.postgresql.service.port }}
+{{- end }}
+{{- else if contains "NodePort" .Values.pgadmin.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ include "postgresql.namespace" . }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "postgresql.fullname" . }}-pgadmin)
+  export NODE_IP=$(kubectl get nodes --namespace {{ include "postgresql.namespace" . }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.pgadmin.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ include "postgresql.namespace" . }} svc -w {{ include "postgresql.fullname" . }}-pgadmin'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ include "postgresql.namespace" . }} {{ include "postgresql.fullname" . }}-pgadmin --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.pgadmin.service.port }}
+{{- else if contains "ClusterIP" .Values.pgadmin.service.type }}
+  echo "Visit http://127.0.0.1:8080 to use pgAdmin"
+  kubectl --namespace {{ include "postgresql.namespace" . }} port-forward svc/{{ include "postgresql.fullname" . }}-pgadmin 8080:80
+{{- end }}
+
+2. Connect to PostgreSQL database:
+{{- if contains "ClusterIP" .Values.postgresql.service.type }}
+  kubectl --namespace {{ include "postgresql.namespace" . }} port-forward svc/{{ include "postgresql.fullname" . }}-postgresql 5432:5432
+  psql -h 127.0.0.1 -U {{ .Values.postgresql.database.user }} -d {{ .Values.postgresql.database.name }}
+{{- end }}
+
+3. Get the PostgreSQL password by running:
+  export POSTGRES_PASSWORD=$(kubectl get secret --namespace {{ include "postgresql.namespace" . }} {{ include "postgresql.fullname" . }}-secret -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+
+4. Get the pgAdmin password by running:
+  export PGADMIN_PASSWORD=$(kubectl get secret --namespace {{ include "postgresql.namespace" . }} {{ include "postgresql.fullname" . }}-secret -o jsonpath="{.data.pgadmin-password}" | base64 --decode)
+
+5. pgAdmin login credentials:
+  - Email: {{ .Values.pgadmin.config.email }}
+  - Password: Use the command above to retrieve the password
+
+WARNING: The PostgreSQL service is configured with default credentials for demonstration purposes.
+Please change the passwords in production environments by updating the values file.

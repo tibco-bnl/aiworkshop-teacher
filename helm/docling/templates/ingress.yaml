@@ -1,0 +1,50 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.dockling.fullname }}
+  namespace: {{ .Values.namespace }}
+  {{- $annotations := dict }}
+  {{- if .Values.ingress.annotations }}
+    {{- $annotations = .Values.ingress.annotations }}
+  {{- end }}
+  {{- if .Values.ingress.whitelistSourceRanges }}
+    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+  {{- end }}
+  {{- if $annotations }}
+  annotations:
+    {{- toYaml $annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if .pathType }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              service:
+                name: {{ $.Values.dockling.fullname }}
+                port:
+                  number: {{ $.Values.service.port }}
+          {{- end }}
+    {{- end }}
+{{- end }}
