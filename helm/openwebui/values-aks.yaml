@@ -1,0 +1,266 @@
+nameOverride: ""
+namespaceOverride: ""
+
+ollama:
+  # Disable embedded Ollama - you can use Azure OpenAI or external Ollama
+  enabled: false
+  fullnameOverride: "open-webui-ollama"
+
+pipelines:
+  # Enable Pipelines to extend Open WebUI functionality
+  enabled: true
+  extraEnvVars: []
+
+tika:
+  # Disable Apache Tika unless needed for document processing
+  enabled: false
+
+# Configure external Ollama URLs if using external Ollama service
+ollamaUrls: []
+
+websocket:
+  # Enable websocket support for real-time features
+  enabled: true
+  manager: redis
+  url: redis://open-webui-redis:6379/0
+  nodeSelector: {}
+  redis:
+    enabled: true
+    name: open-webui-redis
+    labels: {}
+    annotations: {}
+    pods:
+      labels: {}
+      annotations: {}
+    image:
+      repository: redis
+      tag: 7.4.2-alpine3.21
+      pullPolicy: IfNotPresent
+    command: []
+    args: []
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+    service:
+      containerPort: 6379
+      type: ClusterIP
+      labels: {}
+      annotations: {}
+      portName: tcp-redis
+      port: 6379
+      nodePort: ""
+    tolerations: []
+    affinity: {}
+    containerSecurityContext:
+      readOnlyRootFilesystem: false
+      runAsNonRoot: true
+      runAsUser: 999
+    podSecurityContext:
+      runAsUser: 999
+      runAsGroup: 1000
+      fsGroup: 1000
+
+clusterDomain: cluster.local
+
+extraLabels: {}
+annotations: {}
+podAnnotations: {}
+podLabels: {}
+
+# Start with single replica, scale as needed
+replicaCount: 1
+
+revisionHistoryLimit: 10
+priorityClassName: ""
+
+strategy: {}
+
+image:
+  repository: ghcr.io/open-webui/open-webui
+  tag: ""  # Use chart's default or specify a version
+  pullPolicy: "IfNotPresent"
+  useSlim: false
+
+imagePullSecrets: []
+
+command: []
+args: []
+
+serviceAccount:
+  enable: true
+  create: true
+  name: "open-webui-sa"
+  annotations: {}
+  automountServiceAccountToken: false
+
+# Configure health probes for AKS
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 3
+  periodSeconds: 10
+  initialDelaySeconds: 30
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+  failureThreshold: 3
+  periodSeconds: 10
+  initialDelaySeconds: 15
+
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 5
+  failureThreshold: 30
+
+# Resource requests and limits for AKS
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "2Gi"
+    cpu: "2000m"
+
+copyAppData:
+  command: []
+  args: []
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  securityContext:
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+
+# Managed Certificate not applicable for AKS (GKE specific)
+managedCertificate:
+  enabled: false
+
+ingress:
+  # Enable ingress for AKS with Application Gateway or NGINX
+  enabled: true
+  # Use nginx ingress class for AKS (install ingress-nginx controller if needed)
+  class: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # For Application Gateway Ingress Controller (AGIC), use these instead:
+    # kubernetes.io/ingress.class: azure/application-gateway
+    # appgw.ingress.kubernetes.io/ssl-redirect: "true"
+    # Configure cert-manager for TLS if needed:
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  host: "openwebui.dp1.atsnl-emea.azure.dataplanes.pro"
+  additionalHosts: []
+  tls: true
+  existingSecret: ""  # Specify TLS secret name if you have one
+  # If using cert-manager, it will create the secret automatically
+
+service:
+  type: ClusterIP
+  annotations: {}
+  labels: {}
+  loadBalancerClass: ""
+  port: 80
+  containerPort: 8080
+  nodePort: ""
+  portName: http
+
+persistence:
+  # Enable persistent storage for Open WebUI data
+  enabled: true
+  # Use Azure Disk for persistence in AKS
+  storageClass: "managed-csi"  # Default AKS storage class
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  annotations: {}
+  labels: {}
+  selector: {}
+  existingClaim: ""
+
+# Node selector for AKS node pools (if using specific node pools)
+nodeSelector: {}
+  # agentpool: userpool
+
+# Tolerations for node taints
+tolerations: []
+
+# Affinity rules for pod placement
+affinity: {}
+
+# Pod security context for AKS
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+# Container security context
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  capabilities:
+    drop:
+      - ALL
+
+# Environment variables for Open WebUI
+extraEnvVars:
+  - name: WEBUI_SECRET_KEY
+    value: "t0p-s3cr3t-k3y-ch4ng3-m3-pl34s3-f0r-pr0duct10n"
+  # - name: WEBUI_NAME
+  #   value: "Open WebUI"
+  # - name: ENABLE_OAUTH_SIGNUP
+  #   value: "true"
+  # For Azure OpenAI integration:
+  # - name: AZURE_OPENAI_API_KEY
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: azure-openai-secret
+  #       key: api-key
+  # - name: AZURE_OPENAI_ENDPOINT
+  #   value: "https://your-resource.openai.azure.com/"
+
+# Extra volumes and volume mounts
+extraVolumes:
+  - name: tmp
+    emptyDir: {}
+  - name: cache
+    emptyDir: {}
+  - name: static
+    emptyDir: {}
+
+extraVolumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: cache
+    mountPath: /app/backend/data/cache
+  - name: static
+    mountPath: /app/backend/open_webui/static
+
+# Network policy
+networkPolicy:
+  enabled: false
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
