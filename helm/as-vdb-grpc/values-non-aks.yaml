@@ -34,7 +34,10 @@ ftlserver:
   command:
     configPath: /config/ftl-dev.yaml
     name: ftl0
-    licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # Set your license server URL
+    # licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # Commented out - no license file available
+    # Alternative licensing options:
+    # licenseServerUrl: "http://your-license-server:port"  # For license server
+    # licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # For license file (when available)
    
   
   # Config and license files
@@ -43,7 +46,8 @@ ftlserver:
     ftlDevYaml: "files/config/ftl-dev.yaml"
     
     # License key file path (relative to chart directory)
-    licenseKeyFile: "files/license_key/AS-VECTORDB_ANY.bin"
+    # Place your license file in files/license_key/ directory and uncomment below
+    # licenseKeyFile: "files/license_key/AS-VECTORDB_ANY.bin"
   
   resources:
     limits:

@@ -6,6 +6,9 @@ metadata:
   namespace: {{ include "as-vdb-grpc.namespace" . }}
   labels:
     {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+  annotations:
+    # Prevent accidental deletion of PVC
+    "helm.sh/resource-policy": keep
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode | quote }}

@@ -26,16 +26,31 @@ spec:
       serviceAccountName: {{ include "as-vdb-grpc.serviceAccountName" . }}
       initContainers:
         - name: wait-for-ftlserver
-          image: busybox:1.35
+          image: curlimages/curl:7.88.1
           command: ['sh', '-c']
           args:
             - |
               echo "Waiting for FTL server to be ready..."
+              # Wait for TCP connection
               until nc -z {{ include "as-vdb-grpc.fullname" . }}-ftlserver {{ .Values.ftlserver.service.port }}; do
-                echo "FTL server not ready, sleeping..."
-                sleep 5
+                echo "FTL server TCP not ready, sleeping..."
+                sleep 2
               done
-              echo "FTL server is ready!"
+              echo "FTL server TCP is ready, checking HTTP..."
+              # Wait for HTTP response with retries
+              for i in $(seq 1 30); do
+                if curl -f --connect-timeout 5 --max-time 10 http://{{ include "as-vdb-grpc.fullname" . }}-ftlserver:{{ .Values.ftlserver.service.port }}/ >/dev/null 2>&1; then
+                  echo "FTL server HTTP is ready!"
+                  # Additional wait for application-level readiness
+                  echo "Waiting additional 15 seconds for FTL server application readiness..."
+                  sleep 15
+                  exit 0
+                fi
+                echo "Attempt $i: FTL server HTTP not ready, waiting..."
+                sleep 3
+              done
+              echo "FTL server failed to become HTTP ready after 90 seconds"
+              exit 1
         # - name: wait-for-config
         #   image: busybox:1.35
         #   command: ['sh', '-c']

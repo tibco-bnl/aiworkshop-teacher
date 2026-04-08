@@ -7,10 +7,16 @@ metadata:
   labels:
     {{- include "as-vdb-grpc.labels" . | nindent 4 }}
     app.kubernetes.io/component: config
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   backoffLimit: 3
   completions: 1
   parallelism: 1
+  # Automatically delete job after 24 hours
+  ttlSecondsAfterFinished: 86400
   template:
     metadata:
       labels:

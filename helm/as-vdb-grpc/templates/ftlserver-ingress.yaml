@@ -16,10 +16,10 @@ metadata:
   {{- end }}
   {{- if .Values.ingress.className }}
     {{- $annotations = merge $annotations (dict "kubernetes.io/ingress.class" .Values.ingress.className) }}
-  {{- end }}
-  {{- if .Values.ingress.whitelistSourceRanges }}
-    {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
-    {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+    {{- if .Values.ingress.whitelistSourceRanges }}
+      {{- $whitelist := join ", " .Values.ingress.whitelistSourceRanges }}
+      {{- $annotations = merge $annotations (dict "nginx.ingress.kubernetes.io/whitelist-source-range" $whitelist) }}
+    {{- end }}
   {{- end }}
   {{- if $annotations }}
   annotations:

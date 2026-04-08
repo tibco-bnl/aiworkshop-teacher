@@ -34,7 +34,10 @@ ftlserver:
   command:
     configPath: /config/ftl-dev.yaml
     name: ftl0
-    licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # Set your license server URL
+    licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # Commented out - no license file available
+    # Alternative licensing options:
+    # licenseServerUrl: "http://your-license-server:port"  # For license server
+    # licenseServerUrl: "file:///config/AS-VECTORDB_ANY.bin"  # For license file (when available)
    
   
   # Config and license files
@@ -43,6 +46,7 @@ ftlserver:
     ftlDevYaml: "files/config/ftl-dev.yaml"
     
     # License key file path (relative to chart directory)
+    # Place your license file in files/license_key/ directory and uncomment below
     licenseKeyFile: "files/license_key/AS-VECTORDB_ANY.bin"
   
   resources:
@@ -216,10 +220,12 @@ ingress:
   className: "nginx"  # Ingress class name (e.g., "nginx", "traefik")
   createMiddleware: false  # Set to true only if Traefik CRDs are installed
   annotations: {}
-    # traefik.ingress.kubernetes.io/router.tls: "false"
-    # Global Traefik annotations
+    # nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    # Global nginx annotations
   
   # IP whitelist configuration
+  # When specified, creates NetworkPolicy objects to restrict access at network level
+  # This provides better security than ingress-level filtering
   whitelistSourceRanges:
     - 63.34.112.27/32
     - 18.200.217.204/32
@@ -242,8 +248,8 @@ ingress:
     path: /
     pathType: Prefix
     tls:
-      enabled: false
-      secretName: ftlserver-tls
+      enabled: true
+      secretName: dummy-cert
   
   # Vector Store ingress (gRPC)
   vectorstore:
@@ -251,11 +257,13 @@ ingress:
     host: ai-vectorstore
     path: /
     pathType: Prefix
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    annotations: {}
+      # Backend protocol is automatically set based on ingress.className
+      # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"  # For nginx
+      # Traefik uses middleware for gRPC handling (automatically configured)
     tls:
-      enabled: false
-      secretName: vectorstore-tls
+      enabled: true
+      secretName: dummy-cert
   
   # Document Store ingress (gRPC)
   documentstore:
@@ -263,8 +271,10 @@ ingress:
     host: ai-documentstore
     path: /
     pathType: Prefix
-    annotations:
-      nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    annotations: {}
+      # Backend protocol is automatically set based on ingress.className
+      # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"  # For nginx
+      # Traefik uses middleware for gRPC handling (automatically configured)
     tls:
-      enabled: false
-      secretName: documentstore-tls
+      enabled: true
+      secretName: dummy-cert

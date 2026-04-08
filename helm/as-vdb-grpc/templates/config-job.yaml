@@ -8,11 +8,18 @@ metadata:
     {{- include "as-vdb-grpc.labels" . | nindent 4 }}
     app.kubernetes.io/component: config
   annotations:
-    "helm.sh/resource-policy": "keep"
+    # Remove resource policy to allow proper cleanup on uninstall
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-fail-policy": ignore  # Don't fail deployment if config job fails
 spec:
-  backoffLimit: 3
+  backoffLimit: 5  # Increased from 3 to 5
   completions: 1
   parallelism: 1
+  # Automatically delete job after 24 hours
+  ttlSecondsAfterFinished: 86400
+  activeDeadlineSeconds: 600  # Job timeout after 10 minutes
   template:
     metadata:
       labels:
@@ -31,9 +38,16 @@ spec:
           args:
             - |
               echo "Waiting for FTL server to be ready..."
+              timeout=300  # 5 minute timeout
+              elapsed=0
               until nc -z {{ include "as-vdb-grpc.fullname" . }}-ftlserver {{ .Values.ftlserver.service.port }}; do
-                echo "FTL server not ready, sleeping..."
+                echo "FTL server not ready, sleeping... ($elapsed/$timeout seconds elapsed)"
                 sleep 5
+                elapsed=$((elapsed + 5))
+                if [ $elapsed -ge $timeout ]; then
+                  echo "Timeout waiting for FTL server after $timeout seconds"
+                  exit 1
+                fi
               done
               echo "FTL server is ready!"
       containers:

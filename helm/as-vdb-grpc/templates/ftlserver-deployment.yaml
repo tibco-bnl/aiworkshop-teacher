@@ -9,6 +9,8 @@ metadata:
     app.kubernetes.io/component: ftlserver
 spec:
   replicas: 1
+  strategy:
+    type: Recreate  # Ensures only one pod at a time for shared storage
   selector:
     matchLabels:
       {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
@@ -62,10 +64,13 @@ spec:
               readOnly: true
             {{- end }}
             {{- if .Values.ftlserver.config.licenseKeyFile }}
+            {{- $licenseContent := .Files.Get .Values.ftlserver.config.licenseKeyFile }}
+            {{- if $licenseContent }}
             - name: license
               mountPath: /config/AS-VECTORDB_ANY.bin
               subPath: AS-VECTORDB_ANY.bin
               readOnly: true
+            {{- end }}
             {{- end }}
             {{- if .Values.persistence.enabled }}
             - name: data
@@ -82,9 +87,12 @@ spec:
             name: {{ include "as-vdb-grpc.fullname" . }}-config
         {{- end }}
         {{- if .Values.ftlserver.config.licenseKeyFile }}
+        {{- $licenseContent := .Files.Get .Values.ftlserver.config.licenseKeyFile }}
+        {{- if $licenseContent }}
         - name: license
           secret:
             secretName: {{ include "as-vdb-grpc.fullname" . }}-license
+        {{- end }}
         {{- end }}
         {{- if .Values.persistence.enabled }}
         - name: data

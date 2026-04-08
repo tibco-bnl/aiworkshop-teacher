@@ -1,0 +1,179 @@
+{{- if .Values.ingress.whitelistSourceRanges }}
+{{- if .Values.ftlserver.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-ftlserver-whitelist
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ftlserver-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: ftlserver
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from whitelisted IP ranges (external access)
+    - from:
+        {{- range .Values.ingress.whitelistSourceRanges }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ftlserver.service.targetPort }}
+    # Allow ALL internal namespace traffic (simplified)
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ftlserver.service.targetPort }}
+    # Allow nginx ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ftlserver.service.targetPort }}
+  egress:
+    # Allow all outbound traffic (FTL server needs to connect to other services)
+    - {}
+{{- end }}
+{{- if .Values.vectorstore.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-vectorstore-whitelist
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: vectorstore-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: vectorstore
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from whitelisted IP ranges (external access via ingress)
+    - from:
+        {{- range .Values.ingress.whitelistSourceRanges }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vectorstore.service.targetPort }}
+    # Allow traffic from all pods in same namespace (internal communication)
+    - from:
+        - podSelector: {}  # Allow all pods in same namespace
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vectorstore.service.targetPort }}
+    # Allow traffic from nginx ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: {{ .Values.vectorstore.service.targetPort }}
+  egress:
+    # Allow all outbound traffic (vectorstore needs to connect to FTL server)
+    - {}
+{{- end }}
+{{- if .Values.documentstore.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-documentstore-whitelist
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: documentstore-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: documentstore
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from whitelisted IP ranges (external access via ingress)
+    - from:
+        {{- range .Values.ingress.whitelistSourceRanges }}
+        - ipBlock:
+            cidr: {{ . }}
+        {{- end }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.documentstore.service.targetPort }}
+    # Allow traffic from all pods in same namespace (internal communication)
+    - from:
+        - podSelector: {}  # Allow all pods in same namespace
+      ports:
+        - protocol: TCP
+          port: {{ .Values.documentstore.service.targetPort }}
+    # Allow traffic from nginx ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: {{ .Values.documentstore.service.targetPort }}
+  egress:
+    # Allow all outbound traffic (documentstore needs to connect to FTL server)
+    - {}
+{{- end }}
+{{- if .Values.config.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "as-vdb-grpc.fullname" . }}-config-whitelist
+  namespace: {{ include "as-vdb-grpc.namespace" . }}
+  labels:
+    {{- include "as-vdb-grpc.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config-networkpolicy
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "as-vdb-grpc.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: config
+  policyTypes:
+    - Egress
+  egress:
+    # Allow connections to FTL server
+    - to:
+        - podSelector:
+            matchLabels:
+              {{- include "as-vdb-grpc.selectorLabels" . | nindent 14 }}
+              app.kubernetes.io/component: ftlserver
+      ports:
+        - protocol: TCP
+          port: {{ .Values.ftlserver.service.targetPort }}
+    # Allow DNS resolution
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+{{- end }}
+{{- end }}
